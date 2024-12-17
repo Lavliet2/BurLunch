@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BurLunch.WebApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* Общие стили для навигационного меню */
+        .navbar {
+            background-color: #f8f9fa;
+            border-bottom: 3px solid #CE0E2D;
+        }
+
+/*         .navbar-brand {
+            color: #CE0E2D !important;
+            font-size: 1.8rem;
+            font-weight: bold;
+        } */
+
+        .navbar-nav .nav-link {
+            color: #333 !important;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-right: 15px;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #CE0E2D !important;
+        }
+
+        .btn-outline-danger {
+            color: #CE0E2D !important;
+            border-color: #CE0E2D !important; 
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #CE0E2D !important;
+            color: #fff !important;
+        }
+
+        .btn-adjust {
+            transform: translateY(6px);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light">
+            <div class="container-fluid">
+                @* <a class="navbar-brand" href="/">BurLunch.WebApp</a> *@
+
+                @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarMenu">
+                    <ul class="navbar-nav me-auto">
+                        <!-- Пункт меню "Меню" для всех пользователей -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Menu" asp-action="Index">Меню</a>
+                        </li>
+                        @if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+                        {
+                            @if (HttpContextAccessor.HttpContext.User.IsInRole("Administrator"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Admin" asp-action="ManageUsers">Управление пользователями</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Admin" asp-action="ManageMenu">Управление меню</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        @if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item me-3">
+                                <span class="navbar-text text-primary fw-bold">
+                                    @HttpContextAccessor.HttpContext.User.Identity.Name
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm btn-adjust">
+                                        <i class="bi bi-box-arrow-right"></i> Выход
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-4">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container text-center">
+            &copy; 2024 - BurLunch.WebApp
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

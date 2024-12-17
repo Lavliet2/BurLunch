@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Панель администратора";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="admin-actions">
+    <h2>Действия администратора</h2>
+    <ul>
+        <li>
+            <a asp-controller="Users" asp-action="Index" class="btn btn-primary">Управление пользователями</a>
+        </li>
+        <li>
+            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">Управление меню</a>
+        </li>
+    </ul>
+</div>
+
+<hr />
+
+<h2>Информация о пользователе</h2>
+<p>
+@*     Логин: <strong>@HttpContext.Session.GetString("Username")</strong><br />
+    Роль: <strong>@HttpContext.Session.GetString("Role")</strong> *@
+</p>
+
+<hr />
+
+<form method="post" asp-action="Logout" asp-controller="Account">
+    <button type="submit" class="btn btn-danger">Выйти</button>
+</form>
+
+<style>
+    .admin-actions {
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        display: inline-block;
+        margin-bottom: 10px;
+        text-decoration: none;
+        color: white;
+    }
+</style>

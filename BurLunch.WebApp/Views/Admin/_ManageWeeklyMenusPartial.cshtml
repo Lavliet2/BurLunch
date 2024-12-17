@@ -1,0 +1,49 @@
+﻿@model IEnumerable<BurLunch.AuthAPI.Models.WeeklyMenuCard>
+
+<h4>Список недельных меню</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Номер недели</th>
+            <th>Количество дней</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var menu in Model)
+            {
+                <tr>
+                    <td>@menu.WeekNumber</td>
+                    <td>@menu.DailyMenus.Count</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteWeeklyMenu(@menu.Id)">Удалить</button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center">Нет данных для отображения</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function deleteWeeklyMenu(id) {
+        if (confirm('Вы уверены, что хотите удалить недельное меню?')) {
+            fetch(`/Admin/DeleteWeeklyMenu/${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Недельное меню успешно удалено');
+                        location.reload();
+                    } else {
+                        alert('Ошибка при удалении недельного меню');
+                    }
+                });
+        }
+    }
+</script>

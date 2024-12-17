@@ -1,0 +1,6 @@
+@BurLunch.AuthAPI_HostAddress = http://localhost:5098
+
+GET {{BurLunch.AuthAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

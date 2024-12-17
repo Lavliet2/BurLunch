@@ -1,0 +1,130 @@
+﻿@model IEnumerable<BurLunch.AuthAPI.Models.Dish>
+@{
+    ViewData["Title"] = "Управление блюдами";
+}
+
+<h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold; justify-self: center">Управление блюдами</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<!-- Таблица блюд -->
+<table class="table table-striped table-hover">
+    <thead style="background-color: #f7f7f7; color: #333;">
+        <tr>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Тип блюда</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var dish in Model)
+        {
+            <tr>
+                <td>@dish.Name</td>
+                <td>@dish.Description</td>
+                <td>@dish.DishType?.Name</td>
+                <td>
+                    <form method="post" asp-controller="Admin" asp-action="DeleteDish" class="d-inline">
+                        <input type="hidden" name="id" value="@dish.Id" />
+                        <button type="submit" class="btn btn-sm text-white" style="background-color: #CE0E2D; border-radius: 4px;">
+                            Удалить
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Кнопка для вызова модального окна -->
+<button type="button" class="btn text-white mt-3" style="background-color: #CE0E2D; border-radius: 4px;" data-bs-toggle="modal" data-bs-target="#addDishModal">
+    + Добавить блюдо
+</button>
+
+<!-- Модальное окно для добавления блюда -->
+<div class="modal fade" id="addDishModal" tabindex="-1" aria-labelledby="addDishModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #CE0E2D; color: white;">
+                <h5 class="modal-title" id="addDishModalLabel">Добавить блюдо</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDishForm">
+                    <div class="form-group">
+                        <label for="dishName">Название блюда</label>
+                        <input type="text" class="form-control" id="dishName" name="Name" required style="border-radius: 4px;">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="dishDescription">Описание блюда</label>
+                        <textarea class="form-control" id="dishDescription" name="Description" rows="3" style="border-radius: 4px;"></textarea>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="dishType">Тип блюда</label>
+                        <select class="form-control" id="dishType" name="DishTypeId" style="border-radius: 4px;">
+                            @foreach (var type in ViewBag.DishTypes as List<BurLunch.AuthAPI.Models.DishType>)
+                            {
+                                <option value="@type.Id">@type.Name</option>
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn text-white" id="saveDishBtn" style="background-color: #CE0E2D; border-radius: 4px;">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('saveDishBtn').addEventListener('click', function () {
+            const form = document.getElementById('addDishForm');
+            const dishName = form.querySelector('#dishName').value.trim();
+            const dishDescription = form.querySelector('#dishDescription').value.trim();
+            const dishTypeId = form.querySelector('#dishType').value;
+
+            console.log("Добавление блюда:", { dishName, dishDescription, dishTypeId });
+
+            if (!dishName || !dishTypeId) {
+                alert("Название блюда и тип блюда обязательны!");
+                return;
+            }
+
+            fetch('/Admin/AddDish', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: dishName,
+                    description: dishDescription,
+                    dishTypeId: parseInt(dishTypeId)
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    // alert("Блюдо успешно добавлено!");
+                    location.reload();
+                } else {
+                    alert("Ошибка при добавлении блюда.");
+                }
+            })
+            .catch(error => {
+                console.error("Ошибка при добавлении блюда:", error);
+                alert("Ошибка при добавлении блюда.");
+            });
+        });
+    </script>
+}
