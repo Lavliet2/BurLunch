@@ -1,0 +1,116 @@
+﻿@model List<BurLunch.AuthAPI.Models.Table>
+
+<h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold; justify-self: center">Управление столами</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<!-- Таблица столов -->
+<table class="table table-striped table-hover">
+    <thead style="background-color: #f7f7f7; color: #333;">
+        <tr>
+            <th>Номер стола</th>
+            <th>Количество мест</th>
+            <th>Описание</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var table in Model)
+        {
+            <tr>
+                <td>@table.Id</td>
+                <td>@table.Seats</td>
+                <td>@table.Description</td>
+                <td>
+                    <form method="post" asp-action="DeleteTable" asp-controller="Admin" class="d-inline">
+                        <input type="hidden" name="id" value="@table.Id" />
+                        <button type="submit" class="btn btn-sm text-white"
+                                style="background-color: #CE0E2D; border-radius: 4px;"
+                                title="Удалить">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Кнопка для добавления нового стола -->
+<button type="button" class="btn text-white mt-3" style="background-color: #CE0E2D; border-radius: 4px;" data-bs-toggle="modal" data-bs-target="#addTableModal">
+    + Добавить стол
+</button>
+
+<!-- Модальное окно для добавления стола -->
+<div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #CE0E2D; color: white;">
+                <h5 class="modal-title" id="addTableModalLabel">Добавить стол</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addTableForm">
+                    <div class="form-group">
+                        <label for="tableId">Номер стола</label>
+                        <input type="number" class="form-control" id="tableId" required style="border-radius: 4px;">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="seats">Количество мест</label>
+                        <input type="number" class="form-control" id="seats" required style="border-radius: 4px;">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="description">Описание</label>
+                        <input type="text" class="form-control" id="description" required style="border-radius: 4px;">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn text-white" id="saveTableBtn" style="background-color: #CE0E2D; border-radius: 4px;">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('saveTableBtn').addEventListener('click', function () {
+            const tableId = document.getElementById('tableId').value.trim();
+            const seats = document.getElementById('seats').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            if (!tableId || !seats) {
+                alert("Номер стола и количество мест обязательны для заполнения.");
+                return;
+            }
+
+            const table = { id: parseInt(tableId), seats: parseInt(seats), description };
+
+            fetch('/Admin/AddTable', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(table)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // alert("Стол добавлен!");
+                    location.reload();
+                } else {
+                    alert("Ошибка при добавлении стола.");
+                }
+            })
+            .catch(error => console.error(error));
+        });
+    </script>
+}

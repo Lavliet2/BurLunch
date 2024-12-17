@@ -31,7 +31,8 @@ public class DishesController : ControllerBase
         return Ok(dishes);
     }
 
-    [HttpGet]
+    //[HttpGet]
+    [HttpGet("filter")]
     public IActionResult GetDishes([FromQuery] int? dishTypeId)
     {
         var query = _context.Dishes.AsQueryable();

@@ -88,7 +88,12 @@ public class AdminController : Controller
         return RedirectToAction("ManageUsers");
     }
     /*****************************************************************************************/
-    /***** Управление меню*****/
+    /***** Управление блюдами*****/
+
+    public IActionResult ManageMenu()
+    {
+        return View();
+    }
     public class RawDish
     {
         public int Id { get; set; }
@@ -98,10 +103,6 @@ public class AdminController : Controller
         public string DishType { get; set; } // Это строка из JSON
     }
 
-    public IActionResult ManageMenu()
-    {
-        return View();
-    }
     public async Task<IActionResult> ManageDishes()
     {
         var client = _httpClientFactory.CreateClient("BurLunchAPI");
@@ -200,10 +201,67 @@ public class AdminController : Controller
 
         return RedirectToAction("ManageDishes");
     }
+    /*****************************************************************************************/
+    /***** Управление столами*****/
+    [HttpGet]
+    public async Task<IActionResult> ManageTables()
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync("Tables");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var tables = JsonSerializer.Deserialize<List<Table>>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return View(tables);
+        }
+
+        ModelState.AddModelError("", "Не удалось загрузить список столов.");
+        return View(new List<Table>());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddTable([FromBody] Table table)
+    {
+        if (table == null || table.Id <= 0 || table.Seats <= 0)
+        {
+            return BadRequest("Номер стола и количество мест обязательны для заполнения.");
+        }
+
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var jsonContent = new StringContent(JsonSerializer.Serialize(table), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("Tables", jsonContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return Ok(new { message = "Стол успешно добавлен." });
+        }
+
+        return StatusCode((int)response.StatusCode, "Не удалось добавить стол.");
+    }
 
 
+    [HttpPost]
+    public async Task<IActionResult> DeleteTable(int id)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.DeleteAsync($"Tables/{id}");
 
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["Message"] = "Стол успешно удалён.";
+        }
+        else
+        {
+            TempData["Error"] = "Не удалось удалить стол.";
+        }
 
+        return RedirectToAction("ManageTables");
+    }
 
 
 

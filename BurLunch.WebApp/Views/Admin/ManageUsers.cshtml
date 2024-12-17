@@ -34,8 +34,10 @@
                     {
                         <form method="post" asp-controller="Admin" asp-action="DeleteUser" class="d-inline">
                             <input type="hidden" name="id" value="@user.Id" />
-                            <button type="submit" class="btn btn-sm text-white" style="background-color: #CE0E2D; border-radius: 4px;">
-                                Удалить
+                            <button type="submit" class="btn btn-sm text-white"
+                                    style="background-color: #CE0E2D; border-radius: 4px;"
+                                    title="Удалить">
+                                <i class="bi bi-trash"></i>
                             </button>
                         </form>
                     }

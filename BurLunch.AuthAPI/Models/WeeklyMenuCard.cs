@@ -2,9 +2,11 @@
 {
     public class WeeklyMenuCard
     {
-        public int Id { get; set; }
-        public string WeekNumber { get; set; } // Например, "2024-W51"
-        public ICollection<DailyMenu> DailyMenus { get; set; } = new List<DailyMenu>();
+        public int Id { get; set; } // Уникальный идентификатор карточки меню
+        public string Name { get; set; } // Название карточки меню (например, "Бизнес-ланч #1")
+
+        // Список блюд для этого меню
+        public ICollection<Dish> Dishes { get; set; } = new List<Dish>();
     }
 
 }

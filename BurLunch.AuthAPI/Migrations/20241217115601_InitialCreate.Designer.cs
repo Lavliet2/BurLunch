@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BurLunch.AuthAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241215145200_InitialCreate")]
+    [Migration("20241217115601_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,27 +24,6 @@ namespace BurLunch.AuthAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BurLunch.AuthAPI.Models.DailyMenu", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("WeeklyMenuCardId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WeeklyMenuCardId");
-
-                    b.ToTable("DailyMenus");
-                });
-
             modelBuilder.Entity("BurLunch.AuthAPI.Models.Dish", b =>
                 {
                     b.Property<int>("Id")
@@ -52,9 +31,6 @@ namespace BurLunch.AuthAPI.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("DailyMenuId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -67,13 +43,88 @@ namespace BurLunch.AuthAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("WeeklyMenuCardId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("DailyMenuId");
+                    b.HasKey("Id");
 
                     b.HasIndex("DishTypeId");
 
+                    b.HasIndex("WeeklyMenuCardId");
+
                     b.ToTable("Dishes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Из свежих овощей",
+                            DishTypeId = 3,
+                            Name = "Ачичук"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "",
+                            DishTypeId = 3,
+                            Name = "Оливье"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "",
+                            DishTypeId = 3,
+                            Name = "Деревенский"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "По домашнему с фрикадельками и лапшой",
+                            DishTypeId = 1,
+                            Name = "Чучвара"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Грузинский суп с куриным филе",
+                            DishTypeId = 1,
+                            Name = "Мастава"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "С овощным миксом",
+                            DishTypeId = 2,
+                            Name = "Стейк из горбуши"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Из курицы",
+                            DishTypeId = 2,
+                            Name = "Плов"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Из курицы",
+                            DishTypeId = 2,
+                            Name = "Дамляма"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "Напиток дня",
+                            DishTypeId = 4,
+                            Name = "Чай"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Из клюквы",
+                            DishTypeId = 4,
+                            Name = "Морс"
+                        });
                 });
 
             modelBuilder.Entity("BurLunch.AuthAPI.Models.DishType", b =>
@@ -133,6 +184,45 @@ namespace BurLunch.AuthAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tables");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 9999,
+                            Description = "Стол 1 из 4 мест",
+                            Seats = 4
+                        });
+                });
+
+            modelBuilder.Entity("BurLunch.AuthAPI.Models.TableReservation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("TableId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TableId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TableReservations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            TableId = 9999,
+                            UserId = 1
+                        });
                 });
 
             modelBuilder.Entity("BurLunch.AuthAPI.Models.User", b =>
@@ -177,44 +267,54 @@ namespace BurLunch.AuthAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("WeekNumber")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("WeeklyMenuCards");
-                });
 
-            modelBuilder.Entity("BurLunch.AuthAPI.Models.DailyMenu", b =>
-                {
-                    b.HasOne("BurLunch.AuthAPI.Models.WeeklyMenuCard", "WeeklyMenuCard")
-                        .WithMany("DailyMenus")
-                        .HasForeignKey("WeeklyMenuCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("WeeklyMenuCard");
+                    b.HasData(
+                        new
+                        {
+                            Id = 9999,
+                            Name = "Бизнес-ланч #9999"
+                        });
                 });
 
             modelBuilder.Entity("BurLunch.AuthAPI.Models.Dish", b =>
                 {
-                    b.HasOne("BurLunch.AuthAPI.Models.DailyMenu", null)
-                        .WithMany("Dishes")
-                        .HasForeignKey("DailyMenuId");
-
                     b.HasOne("BurLunch.AuthAPI.Models.DishType", "DishType")
                         .WithMany("Dishes")
                         .HasForeignKey("DishTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("BurLunch.AuthAPI.Models.WeeklyMenuCard", null)
+                        .WithMany("Dishes")
+                        .HasForeignKey("WeeklyMenuCardId");
+
                     b.Navigation("DishType");
                 });
 
-            modelBuilder.Entity("BurLunch.AuthAPI.Models.DailyMenu", b =>
+            modelBuilder.Entity("BurLunch.AuthAPI.Models.TableReservation", b =>
                 {
-                    b.Navigation("Dishes");
+                    b.HasOne("BurLunch.AuthAPI.Models.Table", "Table")
+                        .WithMany()
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BurLunch.AuthAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Table");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BurLunch.AuthAPI.Models.DishType", b =>
@@ -224,7 +324,7 @@ namespace BurLunch.AuthAPI.Migrations
 
             modelBuilder.Entity("BurLunch.AuthAPI.Models.WeeklyMenuCard", b =>
                 {
-                    b.Navigation("DailyMenus");
+                    b.Navigation("Dishes");
                 });
 #pragma warning restore 612, 618
         }

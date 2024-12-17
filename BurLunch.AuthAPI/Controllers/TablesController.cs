@@ -29,4 +29,16 @@ public class TablesController : ControllerBase
         _context.SaveChanges();
         return Ok(table);
     }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteTable(int id)
+    {
+        var table = _context.Tables.Find(id);
+        if (table == null)
+            return NotFound($"Стол с ID {id} не найден.");
+
+        _context.Tables.Remove(table);
+        _context.SaveChanges();
+        return Ok(new { message = $"Стол с ID {id} успешно удалён." });
+    }
 }
