@@ -364,4 +364,24 @@ public class AdminController : Controller
         return RedirectToAction("ManageWeeklyMenu");
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAvailableDishes(int weeklyMenuId)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync($"WeeklyMenu/{weeklyMenuId}/available-dishes");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var availableDishes = JsonSerializer.Deserialize<List<RawDish>>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return PartialView("_AvailableDishesPartial", availableDishes);
+        }
+
+        return Content("Ошибка при загрузке блюд");
+    }
+
+
 }

@@ -47,6 +47,25 @@ public class WeeklyMenuController : ControllerBase
 
         return Ok(menus);
     }
+
+    [HttpGet("{weeklyMenuId}/available-dishes")]
+    public IActionResult GetAvailableDishes(int weeklyMenuId)
+    {
+        var weeklyMenu = _context.WeeklyMenuCards
+            .Include(w => w.Dishes)
+            .FirstOrDefault(w => w.Id == weeklyMenuId);
+
+        if (weeklyMenu == null)
+            return NotFound("Бизнес-ланч не найден");
+
+        var allDishes = _context.Dishes.ToList();
+        var availableDishes = allDishes
+            .Where(d => !weeklyMenu.Dishes.Any(wd => wd.Id == d.Id))
+            .ToList();
+
+        return Ok(availableDishes);
+    }
+
     // Добавить новую карточку недельного меню
     [HttpPost]
     public IActionResult AddWeeklyMenu([FromBody] WeeklyMenuCard weeklyMenu)

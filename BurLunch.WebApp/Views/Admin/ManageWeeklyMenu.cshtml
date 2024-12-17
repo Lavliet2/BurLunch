@@ -160,7 +160,6 @@ else
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
                     <!-- Кнопка добавить блюдо -->
-                    <!-- Кнопка добавить блюдо -->
                     <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addDishModal" data-weeklymenuid="@menu.Id" title="Добавить блюдо">
                         <i class="fas fa-plus"></i>
                     </button>
@@ -220,6 +219,36 @@ else
         }
 
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var addDishModal = document.getElementById('addDishModal');
+
+            addDishModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget; // Кнопка, которая открыла модал
+                var weeklyMenuId = button.getAttribute('data-weeklymenuid'); // ID бизнес-ланча
+
+                var dishListContainer = document.getElementById("dishListContainer");
+                dishListContainer.innerHTML = `
+                    <div class="text-center">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    </div>
+                `;
+
+                // Запрос на сервер
+                fetch(`/Admin/GetAvailableDishes?weeklyMenuId=${weeklyMenuId}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        dishListContainer.innerHTML = data;
+                    })
+                    .catch(error => {
+                        console.error("Ошибка при загрузке данных:", error);
+                        dishListContainer.innerHTML = `<div class="text-danger">Ошибка загрузки списка блюд</div>`;
+                    });
+            });
+        });
+    </script>
 
 }
 

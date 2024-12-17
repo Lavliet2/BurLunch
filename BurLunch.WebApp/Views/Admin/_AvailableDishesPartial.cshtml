@@ -1,5 +1,27 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model List<RawDish>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center text-muted">Все блюда уже добавлены в бизнес-ланч.</div>
+}
+else
+{
+    <form method="post" asp-action="AddDishToWeeklyMenu" asp-controller="Admin">
+        <input type="hidden" name="weeklyMenuId" value="@ViewBag.WeeklyMenuId" />
+        <ul class="list-group">
+            @foreach (var dish in Model)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>@dish.Name</strong>
+                        <br />
+                        <small class="text-muted">@dish.Description</small>
+                    </div>
+                    <button type="submit" name="dishId" value="@dish.Id" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </li>
+            }
+        </ul>
+    </form>
 }
