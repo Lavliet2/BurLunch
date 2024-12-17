@@ -1,4 +1,4 @@
-﻿@model List<RawWeeklyMenu>
+﻿@* @model List<RawWeeklyMenu>
 
 <h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Управление недельным меню</h2>
 
@@ -56,3 +56,171 @@ else
         </tbody>
     </table>
 }
+ *@
+
+
+ @* Супер !!!! *@
+@* @model List<RawWeeklyMenu> *@
+
+@* <h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Управление недельным меню</h2> *@
+
+@* @if (Model == null || !Model.Any()) *@
+@* { *@
+@*     <form method="post" asp-action="AddWeeklyMenu" asp-controller="Admin"> *@
+@*         <button type="submit" class="btn text-white mt-3" style="background-color: #CE0E2D; border-radius: 4px;"> *@
+@*             Добавить бизнес-ланч *@
+@*         </button> *@
+@*     </form> *@
+@* } *@
+@* else *@
+@* { *@
+@*     @foreach (var menu in Model)  @* Исправление: определяем переменную 'menu' *@ 
+@*     { *@
+@*         <div class="card mb-4 shadow-sm"> *@
+@*             <div class="card-header bg-danger text-white"> *@
+@*                 <h5 class="mb-0">@menu.Name</h5> *@
+@*             </div> *@
+@*             <div class="card-body"> *@
+@*                 @foreach (var dishType in menu.Dishes.GroupBy(d => d.DishType)) *@
+@*                 { *@
+@*                     <div class="mb-3"> *@
+@*                         <h6 class="text-uppercase text-secondary">@dishType.Key</h6> *@
+@*                         <ul class="list-unstyled"> *@
+@*                             @foreach (var dish in dishType) *@
+@*                             { *@
+@*                                 <li>@dish.Name</li> *@
+@*                             } *@
+@*                         </ul> *@
+@*                     </div> *@
+@*                 } *@
+@*             </div> *@
+@*             <div class="card-footer text-end"> *@
+
+@*                 <form method="post" asp-action="DeleteWeeklyMenu" asp-controller="Admin" class="d-inline"> *@
+@*                     <input type="hidden" name="id" value="@menu.Id" /> *@
+@*                     <button type="submit" class="btn btn-danger btn-sm" title="Удалить"> *@
+@*                         <i class="fas fa-trash-alt"></i> *@
+@*                     </button> *@
+@*                 </form> *@
+@*             </div> *@
+@*         </div> *@
+@*     } *@
+@* } *@
+@model List<RawWeeklyMenu>
+
+<h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Управление недельным меню</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <form method="post" asp-action="AddWeeklyMenu" asp-controller="Admin">
+        <button type="submit" class="btn text-white mt-3" style="background-color: #CE0E2D; border-radius: 4px;">
+            Добавить бизнес-ланч
+        </button>
+    </form>
+}
+else
+{
+    <div class="d-flex flex-wrap gap-4 justify-content-start">
+        @foreach (var menu in Model)
+        {
+            <div class="card shadow-sm" style="width: 18rem; flex: 0 0 auto;">
+                <div class="card-header bg-danger text-white text-center">
+                    <h5 class="mb-0">@menu.Name</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var dishType in menu.Dishes.GroupBy(d => d.DishType))
+                    {
+                        <div class="mb-3">
+                            <h6 class="text-uppercase text-danger fw-bold border-bottom pb-1">
+                                @dishType.Key
+                            </h6>
+                            <ul class="list-unstyled">
+                                @foreach (var dish in dishType)
+                                {
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <!-- Название и описание блюда -->
+                                        <div class="text-center w-100">
+                                            <strong class="d-block mb-1">@dish.Name</strong>
+                                            <div class="text-muted fst-italic" style="font-size: 0.9rem;">@dish.Description</div>
+                                        </div>
+
+                                        <!-- Крестик для удаления блюда -->
+                                        <form method="post" asp-action="RemoveDishFromWeeklyMenu" asp-controller="Admin" class="ms-2">
+                                            <input type="hidden" name="weeklyMenuId" value="@menu.Id" />
+                                            <input type="hidden" name="dishId" value="@dish.Id" />
+                                            <button type="submit" class="btn btn-link p-0 remove-dish-btn" title="Удалить блюдо">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <!-- Кнопка добавить блюдо -->
+                    <!-- Кнопка добавить блюдо -->
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addDishModal" data-weeklymenuid="@menu.Id" title="Добавить блюдо">
+                        <i class="fas fa-plus"></i>
+                    </button>
+
+                    <!-- Модальное окно -->
+                    <div class="modal fade" id="addDishModal" tabindex="-1" aria-labelledby="addDishModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addDishModalLabel">Добавить блюдо в бизнес-ланч</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="dishListContainer">
+                                        <!-- Список блюд будет загружен динамически -->
+                                        <div class="text-center">
+                                            <div class="spinner-border text-danger" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Кнопка удалить -->
+                    <form method="post" asp-action="DeleteWeeklyMenu" asp-controller="Admin" class="d-inline">
+                        <input type="hidden" name="id" value="@menu.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm" title="Удалить">
+                            <i class="fas fa-trash-alt"3></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+    <style>
+        .remove-dish-btn {
+            color: #6c757d; 
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+            outline: none; 
+            box-shadow: none; 
+            pointer-events: auto; 
+        }
+
+        .remove-dish-btn:hover {
+            color: #CE0E2D;
+        }
+
+        .remove-dish-btn:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+    </style>
+
+}
+
+
