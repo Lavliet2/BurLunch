@@ -1,112 +1,4 @@
-﻿@* @model List<RawWeeklyMenu>
-
-<h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Управление недельным меню</h2>
-
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success">@TempData["Message"]</div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-
-@if (Model == null || !Model.Any())
-{
-    <form method="post" asp-action="AddWeeklyMenu" asp-controller="Admin">
-        <button type="submit" class="btn text-white mt-3" style="background-color: #CE0E2D; border-radius: 4px;">
-            Добавить бизнес-ланч
-        </button>
-    </form>
-}
-else
-{
-    <table class="table table-striped table-hover">
-        <thead style="background-color: #f7f7f7; color: #333;">
-            <tr>
-                <th>Название</th>
-                <th>Блюда</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var menu in Model)
-            {
-                <tr>
-                    <td>@menu.Name</td>
-                    <td>
-                        <ul>
-                            @foreach (var dish in menu.Dishes)
-                            {
-                                <li>@dish.Name (@dish.DishType)</li>
-                            }
-                        </ul>
-                    </td>
-                    <td>
-                        <form method="post" asp-action="DeleteWeeklyMenu" asp-controller="Admin" class="d-inline">
-                            <input type="hidden" name="id" value="@menu.Id" />
-                            <button type="submit" class="btn btn-sm text-white" style="background-color: #CE0E2D; border-radius: 4px;">
-                                <i class="fas fa-trash"></i> Удалить
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
- *@
-
-
- @* Супер !!!! *@
-@* @model List<RawWeeklyMenu> *@
-
-@* <h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Управление недельным меню</h2> *@
-
-@* @if (Model == null || !Model.Any()) *@
-@* { *@
-@*     <form method="post" asp-action="AddWeeklyMenu" asp-controller="Admin"> *@
-@*         <button type="submit" class="btn text-white mt-3" style="background-color: #CE0E2D; border-radius: 4px;"> *@
-@*             Добавить бизнес-ланч *@
-@*         </button> *@
-@*     </form> *@
-@* } *@
-@* else *@
-@* { *@
-@*     @foreach (var menu in Model)  @* Исправление: определяем переменную 'menu' *@ 
-@*     { *@
-@*         <div class="card mb-4 shadow-sm"> *@
-@*             <div class="card-header bg-danger text-white"> *@
-@*                 <h5 class="mb-0">@menu.Name</h5> *@
-@*             </div> *@
-@*             <div class="card-body"> *@
-@*                 @foreach (var dishType in menu.Dishes.GroupBy(d => d.DishType)) *@
-@*                 { *@
-@*                     <div class="mb-3"> *@
-@*                         <h6 class="text-uppercase text-secondary">@dishType.Key</h6> *@
-@*                         <ul class="list-unstyled"> *@
-@*                             @foreach (var dish in dishType) *@
-@*                             { *@
-@*                                 <li>@dish.Name</li> *@
-@*                             } *@
-@*                         </ul> *@
-@*                     </div> *@
-@*                 } *@
-@*             </div> *@
-@*             <div class="card-footer text-end"> *@
-
-@*                 <form method="post" asp-action="DeleteWeeklyMenu" asp-controller="Admin" class="d-inline"> *@
-@*                     <input type="hidden" name="id" value="@menu.Id" /> *@
-@*                     <button type="submit" class="btn btn-danger btn-sm" title="Удалить"> *@
-@*                         <i class="fas fa-trash-alt"></i> *@
-@*                     </button> *@
-@*                 </form> *@
-@*             </div> *@
-@*         </div> *@
-@*     } *@
-@* } *@
-@model List<RawWeeklyMenu>
+﻿@model List<RawWeeklyMenu>
 
 <h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Управление недельным меню</h2>
 
@@ -197,6 +89,39 @@ else
                 </div>
             </div>
         }
+        <!-- Пустая карточка для добавления нового бизнес-ланча -->
+        <div class="card shadow-sm d-flex justify-content-center align-items-center add-new-card"
+             style="width: 18rem; height: 12rem; cursor: pointer;"
+             data-bs-toggle="modal" data-bs-target="#addWeeklyMenuModal">
+            <div class="text-center">
+                <i class="fas fa-plus fa-3x text-danger"></i>
+            </div>
+        </div>
+
+        <!-- Модальное окно для добавления бизнес-ланча -->
+        <div class="modal fade" id="addWeeklyMenuModal" tabindex="-1" aria-labelledby="addWeeklyMenuModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #CE0E2D; color: white;">
+                        <h5 class="modal-title" id="addWeeklyMenuModalLabel">Добавить новый бизнес-ланч</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" asp-action="AddWeeklyMenu" asp-controller="Admin">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="menuName" class="form-label">Название бизнес-ланча</label>
+                                <input type="text" class="form-control" id="menuName" name="menuName" required placeholder="Введите название" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn text-white" style="background-color: #CE0E2D;">Добавить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
     <style>
         .remove-dish-btn {
@@ -216,6 +141,15 @@ else
         .remove-dish-btn:focus {
             outline: none !important;
             box-shadow: none !important;
+        }
+
+        .add-new-card {
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .add-new-card:hover {
+            transform: scale(1.05);
+            background-color: #f8d7da; /* Светло-красный цвет при наведении */
         }
 
     </style>
