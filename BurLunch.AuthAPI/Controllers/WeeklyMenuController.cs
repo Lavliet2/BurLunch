@@ -91,7 +91,7 @@ public class WeeklyMenuController : ControllerBase
         var dish = _context.Dishes.Find(dishId);
         if (dish == null) return NotFound("Блюдо не найдено.");
 
-        if (!menu.Dishes.Contains(dish))
+        if (!menu.Dishes.Any(d => d.Id == dishId))
         {
             menu.Dishes.Add(dish);
             _context.SaveChanges();

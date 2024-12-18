@@ -287,10 +287,16 @@ public class AdminController : Controller
 
     // Добавление новой карточки меню
     [HttpPost]
-    public async Task<IActionResult> AddWeeklyMenu()
+    public async Task<IActionResult> AddWeeklyMenu(string menuName)
     {
         var client = _httpClientFactory.CreateClient("BurLunchAPI");
-        var response = await client.PostAsync("WeeklyMenu", null);
+
+        // Формируем JSON-пayload с названием меню
+        var payload = new { Name = menuName };
+        var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+        // Отправляем POST-запрос в API
+        var response = await client.PostAsync("WeeklyMenu", jsonContent);
 
         if (response.IsSuccessStatusCode)
         {
@@ -303,6 +309,7 @@ public class AdminController : Controller
 
         return RedirectToAction("ManageWeeklyMenu");
     }
+
 
     // Удаление карточки меню
     [HttpPost]

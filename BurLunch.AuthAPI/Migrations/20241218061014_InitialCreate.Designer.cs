@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BurLunch.AuthAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241217115601_InitialCreate")]
+    [Migration("20241218061014_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -43,14 +43,9 @@ namespace BurLunch.AuthAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("WeeklyMenuCardId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DishTypeId");
-
-                    b.HasIndex("WeeklyMenuCardId");
 
                     b.ToTable("Dishes");
 
@@ -283,6 +278,21 @@ namespace BurLunch.AuthAPI.Migrations
                         });
                 });
 
+            modelBuilder.Entity("DishWeeklyMenuCard", b =>
+                {
+                    b.Property<int>("DishesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WeeklyMenuCardsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("DishesId", "WeeklyMenuCardsId");
+
+                    b.HasIndex("WeeklyMenuCardsId");
+
+                    b.ToTable("WeeklyMenuDishes", (string)null);
+                });
+
             modelBuilder.Entity("BurLunch.AuthAPI.Models.Dish", b =>
                 {
                     b.HasOne("BurLunch.AuthAPI.Models.DishType", "DishType")
@@ -290,10 +300,6 @@ namespace BurLunch.AuthAPI.Migrations
                         .HasForeignKey("DishTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("BurLunch.AuthAPI.Models.WeeklyMenuCard", null)
-                        .WithMany("Dishes")
-                        .HasForeignKey("WeeklyMenuCardId");
 
                     b.Navigation("DishType");
                 });
@@ -317,12 +323,22 @@ namespace BurLunch.AuthAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BurLunch.AuthAPI.Models.DishType", b =>
+            modelBuilder.Entity("DishWeeklyMenuCard", b =>
                 {
-                    b.Navigation("Dishes");
+                    b.HasOne("BurLunch.AuthAPI.Models.Dish", null)
+                        .WithMany()
+                        .HasForeignKey("DishesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BurLunch.AuthAPI.Models.WeeklyMenuCard", null)
+                        .WithMany()
+                        .HasForeignKey("WeeklyMenuCardsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("BurLunch.AuthAPI.Models.WeeklyMenuCard", b =>
+            modelBuilder.Entity("BurLunch.AuthAPI.Models.DishType", b =>
                 {
                     b.Navigation("Dishes");
                 });

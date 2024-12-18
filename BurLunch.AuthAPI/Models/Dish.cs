@@ -17,5 +17,6 @@ namespace BurLunch.AuthAPI.Models
 
         [ForeignKey("DishTypeId")]
         public DishType? DishType { get; set; } // Сделайте это свойство необязательным
+        public ICollection<WeeklyMenuCard> WeeklyMenuCards { get; set; } = new List<WeeklyMenuCard>();
     }
 }

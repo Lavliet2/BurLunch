@@ -28,14 +28,19 @@ namespace BurLunch.AuthAPI.Data
                 .WithMany(dt => dt.Dishes)
                 .HasForeignKey(d => d.DishTypeId)
                 .OnDelete(DeleteBehavior.Restrict); // Запрещаем каскадное удаление DishType
-
+            // Many-to-Many: WeeklyMenuCard <-> Dish                                       // Many-to-Many: WeeklyMenuCard <-> Dish
+            modelBuilder.Entity<WeeklyMenuCard>()
+                .HasMany(w => w.Dishes)
+                .WithMany(d => d.WeeklyMenuCards)
+                .UsingEntity(j => j.ToTable("WeeklyMenuDishes"));
+        
             // Начальные данные для DishType
             modelBuilder.Entity<DishType>().HasData(
-                new DishType { Id = 3, Name = "Салат" },
-                new DishType { Id = 1, Name = "Суп" },
-                new DishType { Id = 2, Name = "Горячие" },
-                new DishType { Id = 4, Name = "Напиток" }
-            );
+                    new DishType { Id = 3, Name = "Салат" },
+                    new DishType { Id = 1, Name = "Суп" },
+                    new DishType { Id = 2, Name = "Горячие" },
+                    new DishType { Id = 4, Name = "Напиток" }
+                );
 
             // Начальные данные для User
             modelBuilder.Entity<User>().HasData(new User
