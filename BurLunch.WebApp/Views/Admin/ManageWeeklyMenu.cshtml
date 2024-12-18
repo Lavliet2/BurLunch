@@ -163,18 +163,17 @@ else
                     <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addDishModal" data-weeklymenuid="@menu.Id" title="Добавить блюдо">
                         <i class="fas fa-plus"></i>
                     </button>
-
                     <!-- Модальное окно -->
                     <div class="modal fade" id="addDishModal" tabindex="-1" aria-labelledby="addDishModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
-                                <div class="modal-header">
+                                <div class="modal-header" style="background-color: #CE0E2D; color: white;">
                                     <h5 class="modal-title" id="addDishModalLabel">Добавить блюдо в бизнес-ланч</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
+                                <!-- Тело модального окна -->
                                 <div class="modal-body">
                                     <div id="dishListContainer">
-                                        <!-- Список блюд будет загружен динамически -->
                                         <div class="text-center">
                                             <div class="spinner-border text-danger" role="status">
                                                 <span class="visually-hidden">Загрузка...</span>
@@ -182,11 +181,12 @@ else
                                         </div>
                                     </div>
                                 </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-
                     <!-- Кнопка удалить -->
                     <form method="post" asp-action="DeleteWeeklyMenu" asp-controller="Admin" class="d-inline">
                         <input type="hidden" name="id" value="@menu.Id" />

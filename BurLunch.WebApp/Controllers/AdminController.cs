@@ -329,7 +329,7 @@ public class AdminController : Controller
     {
         var client = _httpClientFactory.CreateClient("BurLunchAPI");
         var payload = new { dishId };
-        var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        var jsonContent = new StringContent(dishId.ToString(), Encoding.UTF8, "application/json");
 
         var response = await client.PostAsync($"WeeklyMenu/{weeklyMenuId}/add-dish", jsonContent);
 
@@ -376,7 +376,7 @@ public class AdminController : Controller
                 await response.Content.ReadAsStringAsync(),
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
-
+            ViewBag.WeeklyMenuId = weeklyMenuId;
             return PartialView("_AvailableDishesPartial", availableDishes);
         }
 
