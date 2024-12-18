@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -90,33 +91,27 @@ namespace BurLunch.AuthAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TableReservations",
+                name: "Schedules",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    TableId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    WeeklyMenuId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TableReservations", x => x.Id);
+                    table.PrimaryKey("PK_Schedules", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TableReservations_Tables_TableId",
-                        column: x => x.TableId,
-                        principalTable: "Tables",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TableReservations_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_Schedules_WeeklyMenuCards_WeeklyMenuId",
+                        column: x => x.WeeklyMenuId,
+                        principalTable: "WeeklyMenuCards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "WeeklyMenuDishes",
+                name: "DishWeeklyMenuCard",
                 columns: table => new
                 {
                     DishesId = table.Column<int>(type: "integer", nullable: false),
@@ -124,17 +119,52 @@ namespace BurLunch.AuthAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WeeklyMenuDishes", x => new { x.DishesId, x.WeeklyMenuCardsId });
+                    table.PrimaryKey("PK_DishWeeklyMenuCard", x => new { x.DishesId, x.WeeklyMenuCardsId });
                     table.ForeignKey(
-                        name: "FK_WeeklyMenuDishes_Dishes_DishesId",
+                        name: "FK_DishWeeklyMenuCard_Dishes_DishesId",
                         column: x => x.DishesId,
                         principalTable: "Dishes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WeeklyMenuDishes_WeeklyMenuCards_WeeklyMenuCardsId",
+                        name: "FK_DishWeeklyMenuCard_WeeklyMenuCards_WeeklyMenuCardsId",
                         column: x => x.WeeklyMenuCardsId,
                         principalTable: "WeeklyMenuCards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TableReservations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ScheduleId = table.Column<int>(type: "integer", nullable: false),
+                    TableId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    SeatsReserved = table.Column<int>(type: "integer", nullable: false),
+                    ReservationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TableReservations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TableReservations_Schedules_ScheduleId",
+                        column: x => x.ScheduleId,
+                        principalTable: "Schedules",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TableReservations_Tables_TableId",
+                        column: x => x.TableId,
+                        principalTable: "Tables",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TableReservations_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -182,15 +212,25 @@ namespace BurLunch.AuthAPI.Migrations
                     { 10, "Из клюквы", 4, "Морс" }
                 });
 
-            migrationBuilder.InsertData(
-                table: "TableReservations",
-                columns: new[] { "Id", "TableId", "UserId" },
-                values: new object[] { 1, 9999, 1 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Dishes_DishTypeId",
                 table: "Dishes",
                 column: "DishTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DishWeeklyMenuCard_WeeklyMenuCardsId",
+                table: "DishWeeklyMenuCard",
+                column: "WeeklyMenuCardsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedules_WeeklyMenuId",
+                table: "Schedules",
+                column: "WeeklyMenuId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TableReservations_ScheduleId",
+                table: "TableReservations",
+                column: "ScheduleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TableReservations_TableId",
@@ -201,21 +241,22 @@ namespace BurLunch.AuthAPI.Migrations
                 name: "IX_TableReservations_UserId",
                 table: "TableReservations",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WeeklyMenuDishes_WeeklyMenuCardsId",
-                table: "WeeklyMenuDishes",
-                column: "WeeklyMenuCardsId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "DishWeeklyMenuCard");
+
+            migrationBuilder.DropTable(
                 name: "TableReservations");
 
             migrationBuilder.DropTable(
-                name: "WeeklyMenuDishes");
+                name: "Dishes");
+
+            migrationBuilder.DropTable(
+                name: "Schedules");
 
             migrationBuilder.DropTable(
                 name: "Tables");
@@ -224,13 +265,10 @@ namespace BurLunch.AuthAPI.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Dishes");
+                name: "DishTypes");
 
             migrationBuilder.DropTable(
                 name: "WeeklyMenuCards");
-
-            migrationBuilder.DropTable(
-                name: "DishTypes");
         }
     }
 }

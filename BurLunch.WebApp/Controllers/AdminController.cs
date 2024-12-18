@@ -389,6 +389,31 @@ public class AdminController : Controller
 
         return Content("Ошибка при загрузке блюд");
     }
+    /*****************************************************************************************/
+    /***** Управление рассписанием*****/
+    public IActionResult ManageSchedule()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetWeeklyMenus()
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync("WeeklyMenu");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var weeklyMenus = JsonSerializer.Deserialize<List<RawWeeklyMenu>>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return Json(weeklyMenus); // Возвращаем JSON для фронтенда
+        }
+
+        return StatusCode((int)response.StatusCode, "Ошибка при загрузке меню.");
+    }
 
 
 }

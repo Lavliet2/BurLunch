@@ -12,8 +12,10 @@ namespace BurLunch.AuthAPI.Data
         public DbSet<Dish> Dishes { get; set; }
         public DbSet<DishType> DishTypes { get; set; }
         public DbSet<Table> Tables { get; set; }
+        public DbSet<Schedule> Schedules { get; set; }
         public DbSet<TableReservation> TableReservations { get; set; }
         public DbSet<WeeklyMenuCard> WeeklyMenuCards { get; set; }
+        
 
 
 
@@ -28,19 +30,28 @@ namespace BurLunch.AuthAPI.Data
                 .WithMany(dt => dt.Dishes)
                 .HasForeignKey(d => d.DishTypeId)
                 .OnDelete(DeleteBehavior.Restrict); // Запрещаем каскадное удаление DishType
-            // Many-to-Many: WeeklyMenuCard <-> Dish                                       // Many-to-Many: WeeklyMenuCard <-> Dish
-            modelBuilder.Entity<WeeklyMenuCard>()
-                .HasMany(w => w.Dishes)
-                .WithMany(d => d.WeeklyMenuCards)
-                .UsingEntity(j => j.ToTable("WeeklyMenuDishes"));
-        
+
             // Начальные данные для DishType
             modelBuilder.Entity<DishType>().HasData(
-                    new DishType { Id = 3, Name = "Салат" },
-                    new DishType { Id = 1, Name = "Суп" },
-                    new DishType { Id = 2, Name = "Горячие" },
-                    new DishType { Id = 4, Name = "Напиток" }
-                );
+                new DishType { Id = 3, Name = "Салат" },
+                new DishType { Id = 1, Name = "Суп" },
+                new DishType { Id = 2, Name = "Горячие" },
+                new DishType { Id = 4, Name = "Напиток" }
+            );
+
+            // Связь TableReservation -> Schedule
+            modelBuilder.Entity<TableReservation>()
+                .HasOne(tr => tr.Schedule)
+                .WithMany(s => s.TableReservations)
+                .HasForeignKey(tr => tr.ScheduleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Связь TableReservation -> Table
+            modelBuilder.Entity<TableReservation>()
+                .HasOne(tr => tr.Table)
+                .WithMany()
+                .HasForeignKey(tr => tr.TableId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Начальные данные для User
             modelBuilder.Entity<User>().HasData(new User
@@ -56,9 +67,9 @@ namespace BurLunch.AuthAPI.Data
                 new Table { Id = 9999, Seats = 4, Description = "Стол 1 из 4 мест" }
             );
             // Добавляем запись о бронировании стола пользователем Admin
-            modelBuilder.Entity<TableReservation>().HasData(
-                new TableReservation { Id = 1, TableId = 9999, UserId = 1 }
-            );
+            //modelBuilder.Entity<TableReservation>().HasData(
+            //    new TableReservation { Id = 1, TableId = 9999, UserId = 1 }
+            //);
 
             // Добавляем начальные блюда
             modelBuilder.Entity<Dish>().HasData(
