@@ -1,0 +1,203 @@
+﻿<h2 class="text-center mb-4"></h2>
+<table class="table table-bordered text-center" id="calendar-table">
+    <thead>
+        <tr>
+            <th>Пн</th>
+            <th>Вт</th>
+            <th>Ср</th>
+            <th>Чт</th>
+            <th>Пт</th>
+            <th class="text-danger">Сб</th>
+            <th class="text-danger">Вс</th>
+        </tr>
+    </thead>
+    <tbody id="calendar-body"></tbody>
+</table>
+
+<div class="text-center mt-3">
+    <button id="addLunchBtn" class="btn btn-secondary" disabled data-bs-toggle="modal" data-bs-target="#businessLunchModal">
+        Добавить бизнес-ланч
+    </button>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal fade" id="businessLunchModal" tabindex="-1" aria-labelledby="businessLunchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #CE0E2D; color: white;">
+                <h5 class="modal-title" id="businessLunchModalLabel">Добавить бизнес-ланч</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Список бизнес-ланчей -->
+                <div id="lunchListContainer">
+                    <div class="text-center">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const calendarBody = document.getElementById("calendar-body");
+        const addLunchBtn = document.getElementById("addLunchBtn");
+        const lunchListContainer = document.getElementById("lunchListContainer");
+        let selectedDays = new Set();
+        let isMouseDown = false;
+
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        const monthNames = [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ];
+
+        document.querySelector("h2").textContent = `Расписание бизнес-ланчей: ${monthNames[currentMonth]} ${currentYear}`;
+
+        function generateCalendar() {
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            let day = 1;
+
+            for (let i = 0; i < 6; i++) {
+                const row = document.createElement("tr");
+                for (let j = 0; j < 7; j++) {
+                    const cell = document.createElement("td");
+                    cell.classList.add("calendar-day");
+
+                    if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
+                        cell.textContent = "";
+                    } else if (day <= daysInMonth) {
+                        cell.textContent = day;
+
+                        if (j === 5 || j === 6) {
+                            cell.classList.add("weekend-day");
+                        }
+
+                        cell.setAttribute("data-day", day);
+
+                        cell.addEventListener("mousedown", () => {
+                            isMouseDown = true;
+                            toggleDaySelection(cell);
+                        });
+
+                        cell.addEventListener("mouseover", () => {
+                            if (isMouseDown) toggleDaySelection(cell);
+                        });
+
+                        cell.addEventListener("mouseup", () => {
+                            isMouseDown = false;
+                        });
+
+                        day++;
+                    }
+                    row.appendChild(cell);
+                }
+                calendarBody.appendChild(row);
+            }
+
+            document.addEventListener("mouseup", () => {
+                isMouseDown = false;
+            });
+        }
+
+        function toggleDaySelection(cell) {
+            const day = cell.getAttribute("data-day");
+            if (selectedDays.has(day)) {
+                selectedDays.delete(day);
+                cell.classList.remove("selected-day");
+            } else {
+                selectedDays.add(day);
+                cell.classList.add("selected-day");
+            }
+            updateAddLunchButton();
+        }
+
+        function updateAddLunchButton() {
+            if (selectedDays.size > 0) {
+                addLunchBtn.removeAttribute("disabled");
+                addLunchBtn.classList.add("btn-active");
+            } else {
+                addLunchBtn.setAttribute("disabled", "true");
+                addLunchBtn.classList.remove("btn-active");
+            }
+        }
+
+        addLunchBtn.addEventListener("click", () => {
+            lunchListContainer.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-danger" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </div>
+            `;
+
+            fetch('/Admin/GetWeeklyMenus')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        lunchListContainer.innerHTML = `
+                            <ul class="list-group">
+                                ${data.map(menu => `
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>${menu.name}</strong>
+                                        </div>
+                                        <button class="btn btn-success btn-sm add-lunch" data-id="${menu.id}">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        `;
+                    } else {
+                        lunchListContainer.innerHTML = `<p class="text-center text-muted">Нет доступных бизнес-ланчей.</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    lunchListContainer.innerHTML = `<p class="text-center text-danger">Ошибка загрузки данных.</p>`;
+                });
+        });
+
+        generateCalendar();
+    });
+</script>
+
+<style>
+    .calendar-day {
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        user-select: none;
+    }
+
+    .selected-day {
+        background-color: #ffeb3b !important;
+        color: #333 !important;
+    }
+
+    .weekend-day {
+        background-color: #CE0E2D;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .btn-active {
+        background-color: #CE0E2D;
+        color: white;
+        border: none;
+    }
+
+        .btn-active:hover {
+            background-color: #A10D20;
+        }
+</style>
