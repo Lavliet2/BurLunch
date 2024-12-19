@@ -113,8 +113,7 @@
 
         function toggleDaySelection(cell) {
             const day = cell.getAttribute("data-day");
-            // const fullDate = new Date(currentYear, currentMonth, day).toISOString();
-            const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0];
+            const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0]; // Формат YYYY-MM-DD
 
             if (selectedDays.has(fullDate)) {
                 selectedDays.delete(fullDate);
@@ -178,39 +177,50 @@
                 });
         });
 
-        function sendScheduleCreationRequest() {
-            if (!selectedWeeklyMenuId || selectedDays.size === 0) {
-                alert("Выберите дни и бизнес-ланч.");
-                return;
-            }
-
-            const payload = {
-                Dates: Array.from(selectedDays),
-                WeeklyMenuId: parseInt(selectedWeeklyMenuId)
-            };
-
-            fetch('/Admin/CreateSchedules', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.Message || "Расписания успешно созданы.");
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error(error);
-                    alert("Ошибка при создании расписаний.");
-                });
+    function sendScheduleCreationRequest() {
+        if (!selectedWeeklyMenuId || selectedDays.size === 0) {
+            alert("Выберите дни и бизнес-ланч.");
+            return;
         }
+
+        // Преобразуем даты в ISO-формат (UTC)
+        const payload = Array.from(selectedDays).map(date => ({
+            date: new Date(date).toISOString(), // Формат yyyy-MM-ddTHH:mm:ssZ
+            weeklyMenuId: parseInt(selectedWeeklyMenuId)
+        }));
+
+        console.log("Отправляем payload:", payload); // Для отладки
+
+        fetch('/Admin/CreateSchedules', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Ошибка при отправке данных.");
+                }
+            })
+            .then(data => {
+                alert(data.Message || "Расписания успешно созданы.");
+                location.reload();
+            })
+            .catch(error => {
+                console.error("Ошибка при создании расписаний:", error);
+                alert("Ошибка при создании расписаний.");
+            });
+    }
+
+
 
         generateCalendar();
     });
-
 </script>
+
 
 <style>
     .calendar-day {

@@ -167,8 +167,8 @@ namespace BurLunch.AuthAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("WeeklyMenuId")
                         .HasColumnType("integer");

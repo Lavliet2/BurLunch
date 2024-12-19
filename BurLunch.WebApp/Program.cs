@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using BurLunch.AuthAPI.Utils;
 
 namespace BurLunch.WebApp
 {

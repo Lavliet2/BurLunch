@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BurLunch.AuthAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241218161600_UpdateDateToDateOnly")]
-    partial class UpdateDateToDateOnly
+    [Migration("20241219042347_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,8 +170,8 @@ namespace BurLunch.AuthAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("WeeklyMenuId")
                         .HasColumnType("integer");

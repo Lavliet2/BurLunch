@@ -3,6 +3,7 @@ using BurLunch.AuthAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using BurLunch.AuthAPI.Services;
 using System.Text.Json;
+using BurLunch.AuthAPI.Utils;
 
 namespace BurLunch.AuthAPI
 {
@@ -18,6 +19,8 @@ namespace BurLunch.AuthAPI
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.Converters.Add(new FlexibleDateTimeConverter());
+                    //options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
                 });
             builder.Services.AddScoped<AuthenticationService>();
 

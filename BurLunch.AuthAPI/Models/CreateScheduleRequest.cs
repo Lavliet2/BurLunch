@@ -2,7 +2,7 @@
 {
     public class CreateScheduleRequest
     {
-        public DateOnly Date { get; set; }
+        public DateTime Date { get; set; }
         public int WeeklyMenuId { get; set; }
     }
 

@@ -3,7 +3,7 @@
     public class Schedule
     {
         public int Id { get; set; }
-        public DateOnly Date { get; set; } // Дата расписания
+        public DateTime Date { get; set; } // Дата расписания
 
         public int WeeklyMenuId { get; set; }
         public WeeklyMenuCard WeeklyMenu { get; set; } // Связь с бизнес-ланчем
