@@ -1,4 +1,8 @@
-﻿<h2 class="text-center mb-4"></h2>
+﻿<h2 class="text-center mb-4">
+    <span id="prevMonth" style="cursor: pointer; margin-right: 10px;">&#8592;</span>
+    Расписание бизнес-ланчей: <span id="monthYear"></span>
+    <span id="nextMonth" style="cursor: pointer; margin-left: 10px;">&#8594;</span>
+</h2>
 <table class="table table-bordered text-center" id="calendar-table">
     <thead>
         <tr>
@@ -21,7 +25,6 @@
     <button id="removeLunchBtn" class="btn btn-danger" disabled>
         Удалить расписание
     </button>
-
 </div>
 
 <!-- Модальное окно -->
@@ -33,7 +36,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Список бизнес-ланчей -->
                 <div id="lunchListContainer">
                     <div class="text-center">
                         <div class="spinner-border text-danger" role="status">
@@ -55,19 +57,24 @@
         const addLunchBtn = document.getElementById("addLunchBtn");
         const lunchListContainer = document.getElementById("lunchListContainer");
         const removeLunchBtn = document.getElementById("removeLunchBtn");
+        const monthYearText = document.getElementById("monthYear");
+        const prevMonthButton = document.getElementById("prevMonth");
+        const nextMonthButton = document.getElementById("nextMonth");
         let selectedDays = new Set();
         let selectedWeeklyMenuId = null;
         let isMouseDown = false;
 
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
         const monthNames = [
             "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         ];
 
-        document.querySelector("h2").textContent = `Расписание бизнес-ланчей: ${monthNames[currentMonth]} ${currentYear}`;
+        function updateHeader() {
+            monthYearText.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        }
 
         async function fetchSchedules() {
             try {
@@ -76,7 +83,7 @@
                     throw new Error('Ошибка при загрузке расписаний');
                 }
                 const schedules = await response.json();
-                return schedules; // Предполагается, что API возвращает массив с датами расписаний
+                return schedules;
             } catch (error) {
                 console.error('Ошибка при получении расписаний:', error);
                 return [];
@@ -84,6 +91,7 @@
         }
 
         async function generateCalendar() {
+            calendarBody.innerHTML = ""; // Очищаем календарь
             const schedules = await fetchSchedules();
             const scheduleDates = schedules.map(schedule => new Date(schedule.date).toISOString().split('T')[0]);
 
@@ -109,7 +117,6 @@
                         const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0];
                         cell.setAttribute("data-day", day);
 
-                        // Подсветить дату, если она есть в расписании
                         if (scheduleDates.includes(fullDate)) {
                             cell.classList.add("has-schedule");
                         }
@@ -137,12 +144,13 @@
             document.addEventListener("mouseup", () => {
                 isMouseDown = false;
             });
+            updateAddLunchButton();
             updateRemoveLunchButton();
         }
 
         function toggleDaySelection(cell) {
             const day = cell.getAttribute("data-day");
-            const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0]; // Формат YYYY-MM-DD
+            const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0];
 
             if (selectedDays.has(fullDate)) {
                 selectedDays.delete(fullDate);
@@ -160,17 +168,48 @@
                 new Date(currentYear, currentMonth, cell.getAttribute("data-day")).toISOString().split('T')[0]
             );
 
-            // Проверяем, есть ли выбранные дни без расписания
             const hasDaysWithoutSchedule = Array.from(selectedDays).some(date => !scheduleDates.includes(date));
 
             if (selectedDays.size > 0 && hasDaysWithoutSchedule) {
                 addLunchBtn.removeAttribute("disabled");
-                addLunchBtn.classList.add("btn-active");
             } else {
                 addLunchBtn.setAttribute("disabled", "true");
-                addLunchBtn.classList.remove("btn-active");
             }
         }
+
+        function updateRemoveLunchButton() {
+            const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell =>
+                new Date(currentYear, currentMonth, cell.getAttribute("data-day")).toISOString().split('T')[0]
+            );
+
+            const hasDaysWithSchedule = Array.from(selectedDays).some(date => scheduleDates.includes(date));
+
+            if (selectedDays.size > 0 && hasDaysWithSchedule) {
+                removeLunchBtn.removeAttribute("disabled");
+            } else {
+                removeLunchBtn.setAttribute("disabled", "true");
+            }
+        }
+
+        prevMonthButton.addEventListener("click", () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            updateHeader();
+            generateCalendar();
+        });
+
+        nextMonthButton.addEventListener("click", () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateHeader();
+            generateCalendar();
+        });
 
         addLunchBtn.addEventListener("click", () => {
             lunchListContainer.innerHTML = `
@@ -220,17 +259,14 @@
                 return;
             }
 
-            // Преобразуем даты в ISO-формат с учётом локального времени
             const payload = Array.from(selectedDays).map(date => {
                 const localDate = new Date(date);
-                const isoDate = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}T00:00:00`; // Локальное время без часового пояса
+                const isoDate = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}T00:00:00`;
                 return {
                     date: isoDate,
                     weeklyMenuId: parseInt(selectedWeeklyMenuId)
                 };
             });
-
-            console.log("Отправляем payload:", payload); 
 
             fetch('/Admin/CreateSchedules', {
                 method: "POST",
@@ -239,40 +275,10 @@
                 },
                 body: JSON.stringify(payload)
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error("Ошибка при отправке данных.");
-                    }
-                })
-                .then(data => {
-                    // alert(data.Message || "Расписания успешно созданы.");
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error("Ошибка при создании расписаний:", error);
-                    alert("Ошибка при создании расписаний.");
-                });
+                .then(response => response.ok ? response.json() : Promise.reject(response))
+                .then(() => location.reload())
+                .catch(() => alert("Ошибка при создании расписаний."));
         }
-
-        function updateRemoveLunchButton() {
-            const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell =>
-                new Date(currentYear, currentMonth, cell.getAttribute("data-day")).toISOString().split('T')[0]
-            );
-
-            // Проверяем, есть ли выбранные дни с расписанием
-            const hasDaysWithSchedule = Array.from(selectedDays).some(date => scheduleDates.includes(date));
-
-            if (selectedDays.size > 0 && hasDaysWithSchedule) {
-                removeLunchBtn.removeAttribute("disabled");
-                // removeLunchBtn.classList.add("btn-active");
-            } else {
-                removeLunchBtn.setAttribute("disabled", "true");
-                // removeLunchBtn.classList.remove("btn-active");
-            }
-        }
-
 
         removeLunchBtn.addEventListener("click", () => {
             if (selectedDays.size === 0) {
@@ -292,27 +298,14 @@
                 },
                 body: JSON.stringify(payload)
             })
-                .then(response => {
-                    if (response.ok) {
-                        alert("Расписания успешно удалены.");
-                        location.reload();
-                    } else {
-                        throw new Error("Ошибка при удалении расписаний.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Ошибка при удалении расписаний:", error);
-                    alert("Ошибка при удалении расписаний.");
-                });
+                .then(response => response.ok ? location.reload() : Promise.reject(response))
+                .catch(() => alert("Ошибка при удалении расписаний."));
         });
 
-
-
+        updateHeader();
         generateCalendar();
     });
 </script>
-
-
 <style>
     .calendar-day {
         cursor: pointer;
@@ -337,9 +330,9 @@
         border: none;
     }
 
-    .btn-active:hover {
+        .btn-active:hover {
             background-color: #009900;
-    }
+        }
 
     .has-schedule {
         background-color: #4CAF50 !important;
@@ -347,4 +340,3 @@
         font-weight: bold;
     }
 </style>
-
