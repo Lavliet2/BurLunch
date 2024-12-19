@@ -51,6 +51,7 @@
         const addLunchBtn = document.getElementById("addLunchBtn");
         const lunchListContainer = document.getElementById("lunchListContainer");
         let selectedDays = new Set();
+        let selectedWeeklyMenuId = null;
         let isMouseDown = false;
 
         const currentDate = new Date();
@@ -112,11 +113,14 @@
 
         function toggleDaySelection(cell) {
             const day = cell.getAttribute("data-day");
-            if (selectedDays.has(day)) {
-                selectedDays.delete(day);
+            // const fullDate = new Date(currentYear, currentMonth, day).toISOString();
+            const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0];
+
+            if (selectedDays.has(fullDate)) {
+                selectedDays.delete(fullDate);
                 cell.classList.remove("selected-day");
             } else {
-                selectedDays.add(day);
+                selectedDays.add(fullDate);
                 cell.classList.add("selected-day");
             }
             updateAddLunchButton();
@@ -149,9 +153,7 @@
                             <ul class="list-group">
                                 ${data.map(menu => `
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>${menu.name}</strong>
-                                        </div>
+                                        <strong>${menu.name}</strong>
                                         <button class="btn btn-success btn-sm add-lunch" data-id="${menu.id}">
                                             <i class="fas fa-plus"></i>
                                         </button>
@@ -159,6 +161,13 @@
                                 `).join('')}
                             </ul>
                         `;
+
+                        document.querySelectorAll(".add-lunch").forEach(button => {
+                            button.addEventListener("click", () => {
+                                selectedWeeklyMenuId = button.getAttribute("data-id");
+                                sendScheduleCreationRequest();
+                            });
+                        });
                     } else {
                         lunchListContainer.innerHTML = `<p class="text-center text-muted">Нет доступных бизнес-ланчей.</p>`;
                     }
@@ -169,8 +178,38 @@
                 });
         });
 
+        function sendScheduleCreationRequest() {
+            if (!selectedWeeklyMenuId || selectedDays.size === 0) {
+                alert("Выберите дни и бизнес-ланч.");
+                return;
+            }
+
+            const payload = {
+                Dates: Array.from(selectedDays),
+                WeeklyMenuId: parseInt(selectedWeeklyMenuId)
+            };
+
+            fetch('/Admin/CreateSchedules', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.Message || "Расписания успешно созданы.");
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Ошибка при создании расписаний.");
+                });
+        }
+
         generateCalendar();
     });
+
 </script>
 
 <style>

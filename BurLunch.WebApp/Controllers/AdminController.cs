@@ -415,5 +415,40 @@ public class AdminController : Controller
         return StatusCode((int)response.StatusCode, "Ошибка при загрузке меню.");
     }
 
+    [HttpPost]
+    public async Task<IActionResult> CreateSchedules([FromBody] CreateSchedulesRequest request)
+    {
+        if (request == null || request.Dates == null || request.Dates.Count == 0 || request.WeeklyMenuId <= 0)
+            return BadRequest("Некорректные данные.");
+
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+
+        // Формируем список ScheduleRequest
+        var schedules = request.Dates.Select(date => new CreateScheduleRequest
+        {
+            Date = DateOnly.FromDateTime(date), // Преобразуем DateTime в DateOnly
+            WeeklyMenuId = request.WeeklyMenuId
+        }).ToList();
+
+        // Сериализуем список в JSON
+        var jsonContent = new StringContent(JsonSerializer.Serialize(schedules), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("Schedules/BulkCreate", jsonContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return Ok(new { Message = "Расписания успешно созданы." });
+        }
+
+        return StatusCode((int)response.StatusCode, "Ошибка при создании расписания.");
+    }
+
+
+
+    public class CreateSchedulesRequest
+    {
+        public List<DateTime> Dates { get; set; }
+        public int WeeklyMenuId { get; set; }
+    }
 
 }

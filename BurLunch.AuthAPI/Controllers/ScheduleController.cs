@@ -56,6 +56,29 @@ public class ScheduleController : ControllerBase
         return CreatedAtAction(nameof(GetScheduleById), new { id = schedule.Id }, schedule);
     }
 
+    [HttpPost("BulkCreate")]
+    public IActionResult BulkCreateSchedules([FromBody] List<CreateScheduleRequest> schedules)
+    {
+        if (schedules == null || schedules.Count == 0)
+            return BadRequest("Данные для создания расписания отсутствуют.");
+
+        foreach (var scheduleData in schedules)
+        {
+            var schedule = new Schedule
+            {
+                Date = scheduleData.Date,
+                WeeklyMenuId = scheduleData.WeeklyMenuId
+            };
+
+            _context.Schedules.Add(schedule);
+        }
+
+        _context.SaveChanges();
+
+        return Ok(new { Message = "Расписания успешно созданы." });
+    }
+
+
     // Обновить расписание
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateSchedule(int id, [FromBody] Schedule updatedSchedule)

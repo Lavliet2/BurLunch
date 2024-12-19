@@ -2,6 +2,7 @@
 using BurLunch.AuthAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using BurLunch.AuthAPI.Services;
+using System.Text.Json;
 
 namespace BurLunch.AuthAPI
 {
@@ -13,7 +14,11 @@ namespace BurLunch.AuthAPI
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                });
             builder.Services.AddScoped<AuthenticationService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

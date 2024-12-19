@@ -15,6 +15,12 @@ namespace BurLunch.WebApp
                 var baseUrl = builder.Configuration["ApiSettings:BaseUrl"];
                 client.BaseAddress = new Uri(baseUrl);
             });
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+                });
+
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
