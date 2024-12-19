@@ -156,7 +156,14 @@
         }
 
         function updateAddLunchButton() {
-            if (selectedDays.size > 0) {
+            const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell =>
+                new Date(currentYear, currentMonth, cell.getAttribute("data-day")).toISOString().split('T')[0]
+            );
+
+            // Проверяем, есть ли выбранные дни без расписания
+            const hasDaysWithoutSchedule = Array.from(selectedDays).some(date => !scheduleDates.includes(date));
+
+            if (selectedDays.size > 0 && hasDaysWithoutSchedule) {
                 addLunchBtn.removeAttribute("disabled");
                 addLunchBtn.classList.add("btn-active");
             } else {
@@ -240,7 +247,7 @@
                     }
                 })
                 .then(data => {
-                    alert(data.Message || "Расписания успешно созданы.");
+                    // alert(data.Message || "Расписания успешно созданы.");
                     location.reload();
                 })
                 .catch(error => {
@@ -250,7 +257,14 @@
         }
 
         function updateRemoveLunchButton() {
-            if (selectedDays.size > 0) {
+            const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell =>
+                new Date(currentYear, currentMonth, cell.getAttribute("data-day")).toISOString().split('T')[0]
+            );
+
+            // Проверяем, есть ли выбранные дни с расписанием
+            const hasDaysWithSchedule = Array.from(selectedDays).some(date => scheduleDates.includes(date));
+
+            if (selectedDays.size > 0 && hasDaysWithSchedule) {
                 removeLunchBtn.removeAttribute("disabled");
                 // removeLunchBtn.classList.add("btn-active");
             } else {
@@ -259,9 +273,10 @@
             }
         }
 
+
         removeLunchBtn.addEventListener("click", () => {
             if (selectedDays.size === 0) {
-                // alert("Выберите дни для удаления расписания.");
+                alert("Выберите дни для удаления расписания.");
                 return;
             }
 
@@ -301,7 +316,7 @@
 <style>
     .calendar-day {
         cursor: pointer;
-        transition: background-color 0.3s ease-in-out;
+        transition: all 0.3s ease-in-out;
         user-select: none;
     }
 
