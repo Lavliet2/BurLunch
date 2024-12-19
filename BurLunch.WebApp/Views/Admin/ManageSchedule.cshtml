@@ -18,6 +18,10 @@
     <button id="addLunchBtn" class="btn btn-secondary" disabled data-bs-toggle="modal" data-bs-target="#businessLunchModal">
         Добавить бизнес-ланч
     </button>
+    <button id="removeLunchBtn" class="btn btn-danger" disabled>
+        Удалить расписание
+    </button>
+
 </div>
 
 <!-- Модальное окно -->
@@ -50,6 +54,7 @@
         const calendarBody = document.getElementById("calendar-body");
         const addLunchBtn = document.getElementById("addLunchBtn");
         const lunchListContainer = document.getElementById("lunchListContainer");
+        const removeLunchBtn = document.getElementById("removeLunchBtn");
         let selectedDays = new Set();
         let selectedWeeklyMenuId = null;
         let isMouseDown = false;
@@ -64,7 +69,24 @@
 
         document.querySelector("h2").textContent = `Расписание бизнес-ланчей: ${monthNames[currentMonth]} ${currentYear}`;
 
-        function generateCalendar() {
+        async function fetchSchedules() {
+            try {
+                const response = await fetch('/Admin/GetSchedules');
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке расписаний');
+                }
+                const schedules = await response.json();
+                return schedules; // Предполагается, что API возвращает массив с датами расписаний
+            } catch (error) {
+                console.error('Ошибка при получении расписаний:', error);
+                return [];
+            }
+        }
+
+        async function generateCalendar() {
+            const schedules = await fetchSchedules();
+            const scheduleDates = schedules.map(schedule => new Date(schedule.date).toISOString().split('T')[0]);
+
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             let day = 1;
@@ -84,7 +106,13 @@
                             cell.classList.add("weekend-day");
                         }
 
+                        const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0];
                         cell.setAttribute("data-day", day);
+
+                        // Подсветить дату, если она есть в расписании
+                        if (scheduleDates.includes(fullDate)) {
+                            cell.classList.add("has-schedule");
+                        }
 
                         cell.addEventListener("mousedown", () => {
                             isMouseDown = true;
@@ -109,6 +137,7 @@
             document.addEventListener("mouseup", () => {
                 isMouseDown = false;
             });
+            updateRemoveLunchButton();
         }
 
         function toggleDaySelection(cell) {
@@ -123,6 +152,7 @@
                 cell.classList.add("selected-day");
             }
             updateAddLunchButton();
+            updateRemoveLunchButton();
         }
 
         function updateAddLunchButton() {
@@ -177,43 +207,89 @@
                 });
         });
 
-    function sendScheduleCreationRequest() {
-        if (!selectedWeeklyMenuId || selectedDays.size === 0) {
-            alert("Выберите дни и бизнес-ланч.");
-            return;
+        function sendScheduleCreationRequest() {
+            if (!selectedWeeklyMenuId || selectedDays.size === 0) {
+                alert("Выберите дни и бизнес-ланч.");
+                return;
+            }
+
+            // Преобразуем даты в ISO-формат с учётом локального времени
+            const payload = Array.from(selectedDays).map(date => {
+                const localDate = new Date(date);
+                const isoDate = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}T00:00:00`; // Локальное время без часового пояса
+                return {
+                    date: isoDate,
+                    weeklyMenuId: parseInt(selectedWeeklyMenuId)
+                };
+            });
+
+            console.log("Отправляем payload:", payload); 
+
+            fetch('/Admin/CreateSchedules', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error("Ошибка при отправке данных.");
+                    }
+                })
+                .then(data => {
+                    alert(data.Message || "Расписания успешно созданы.");
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error("Ошибка при создании расписаний:", error);
+                    alert("Ошибка при создании расписаний.");
+                });
         }
 
-        // Преобразуем даты в ISO-формат (UTC)
-        const payload = Array.from(selectedDays).map(date => ({
-            date: new Date(date).toISOString(), // Формат yyyy-MM-ddTHH:mm:ssZ
-            weeklyMenuId: parseInt(selectedWeeklyMenuId)
-        }));
+        function updateRemoveLunchButton() {
+            if (selectedDays.size > 0) {
+                removeLunchBtn.removeAttribute("disabled");
+                // removeLunchBtn.classList.add("btn-active");
+            } else {
+                removeLunchBtn.setAttribute("disabled", "true");
+                // removeLunchBtn.classList.remove("btn-active");
+            }
+        }
 
-        console.log("Отправляем payload:", payload); // Для отладки
+        removeLunchBtn.addEventListener("click", () => {
+            if (selectedDays.size === 0) {
+                // alert("Выберите дни для удаления расписания.");
+                return;
+            }
 
-        fetch('/Admin/CreateSchedules', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error("Ошибка при отправке данных.");
-                }
-            })
-            .then(data => {
-                alert(data.Message || "Расписания успешно созданы.");
-                location.reload();
-            })
-            .catch(error => {
-                console.error("Ошибка при создании расписаний:", error);
-                alert("Ошибка при создании расписаний.");
+            const payload = Array.from(selectedDays).map(date => {
+                const localDate = new Date(date);
+                return `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`;
             });
-    }
+
+            fetch('/Admin/DeleteSchedules', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Расписания успешно удалены.");
+                        location.reload();
+                    } else {
+                        throw new Error("Ошибка при удалении расписаний.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка при удалении расписаний:", error);
+                    alert("Ошибка при удалении расписаний.");
+                });
+        });
 
 
 
@@ -225,28 +301,35 @@
 <style>
     .calendar-day {
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease-in-out;
         user-select: none;
     }
 
     .selected-day {
-        background-color: #ffeb3b !important;
-        color: #333 !important;
+        background-color: darkgray !important; /* Светло-зелёный цвет для выделения */
+        color: white !important; /* Белый текст для контраста */
     }
 
     .weekend-day {
-        background-color: #CE0E2D;
-        color: #fff;
+        /* background-color: #CE0E2D; */
+        color: #CE0E2D !important;
         font-weight: bold;
     }
 
     .btn-active {
-        background-color: #CE0E2D;
+        background-color: #4CAF50;
         color: white;
         border: none;
     }
 
-        .btn-active:hover {
-            background-color: #A10D20;
-        }
+    .btn-active:hover {
+            background-color: #009900;
+    }
+
+    .has-schedule {
+        background-color: #4CAF50 !important;
+        color: #000;
+        font-weight: bold;
+    }
 </style>
+

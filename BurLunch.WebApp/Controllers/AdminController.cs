@@ -415,33 +415,20 @@ public class AdminController : Controller
         return StatusCode((int)response.StatusCode, "Ошибка при загрузке меню.");
     }
 
-    //[HttpPost]
-    //public async Task<IActionResult> CreateSchedules([FromBody] CreateSchedulesRequest request)
-    //{
-    //    if (request == null || request.Dates == null || request.Dates.Count == 0 || request.WeeklyMenuId <= 0)
-    //        return BadRequest("Некорректные данные.");
+    [HttpGet]
+    public async Task<IActionResult> GetSchedules()
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync("Schedule");
 
-    //    var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        if (!response.IsSuccessStatusCode)
+        {
+            return StatusCode((int)response.StatusCode, "Ошибка при загрузке расписания.");
+        }
 
-    //    // Формируем список ScheduleRequest
-    //    var schedules = request.Dates.Select(date => new CreateScheduleRequest
-    //    {
-    //        Date = DateOnly.FromDateTime(date), // Преобразуем DateTime в DateOnly
-    //        WeeklyMenuId = request.WeeklyMenuId
-    //    }).ToList();
-
-    //    // Сериализуем список в JSON
-    //    var jsonContent = new StringContent(JsonSerializer.Serialize(schedules), Encoding.UTF8, "application/json");
-
-    //    var response = await client.PostAsync("Schedules/BulkCreate", jsonContent);
-
-    //    if (response.IsSuccessStatusCode)
-    //    {
-    //        return Ok(new { Message = "Расписания успешно созданы." });
-    //    }
-
-    //    return StatusCode((int)response.StatusCode, "Ошибка при создании расписания.");
-    //}
+        var schedules = await response.Content.ReadAsStringAsync();
+        return Content(schedules, "application/json");
+    }
 
 
     [HttpPost]
@@ -454,25 +441,21 @@ public class AdminController : Controller
 
         try
         {
-            // Убедимся, что даты в формате UTC
             var processedSchedules = schedules.Select(schedule => new CreateScheduleRequest
             {
                 Date = DateTime.SpecifyKind(schedule.Date, DateTimeKind.Utc), // Преобразуем дату в UTC
                 WeeklyMenuId = schedule.WeeklyMenuId
             }).ToList();
 
-            // Сериализуем список в JSON
             var json = JsonSerializer.Serialize(processedSchedules, new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase // Формат camelCase
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
 
             Console.WriteLine($"Отправляем JSON: {json}");
 
-            // Создаём контент для HTTP-запроса
             var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-            // Отправляем запрос через HTTP-клиент
             var client = _httpClientFactory.CreateClient("BurLunchAPI");
             var response = await client.PostAsync("Schedule/BulkCreate", jsonContent);
 
@@ -483,7 +466,6 @@ public class AdminController : Controller
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                TestCreateSchedules();
                 return StatusCode((int)response.StatusCode, $"Ошибка при создании расписания: {errorMessage}");
             }
         }
@@ -494,38 +476,39 @@ public class AdminController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> TestCreateSchedules()
+    public async Task<IActionResult> DeleteSchedules([FromBody] List<DateTime> dates)
     {
-        var testSchedules = new List<CreateScheduleRequest>
-    {
-        new CreateScheduleRequest
+        if (dates == null || dates.Count == 0)
         {
-            Date = DateTime.SpecifyKind(new DateTime(2024, 12, 25, 0, 0, 0), DateTimeKind.Utc),
-            WeeklyMenuId = 10001
-        }
-    };
-
-        var json = JsonSerializer.Serialize(testSchedules, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-
-        Console.WriteLine($"Тестовые данные JSON: {json}");
-
-        var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
-        var client = _httpClientFactory.CreateClient("BurLunchAPI");
-        var response = await client.PostAsync("Schedules/BulkCreate", jsonContent);
-
-        if (response.IsSuccessStatusCode)
-        {
-            return Ok(new { Message = "Тестовое расписание успешно создано." });
+            return BadRequest("Даты для удаления отсутствуют.");
         }
 
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return StatusCode((int)response.StatusCode, $"Ошибка API: {errorContent}");
+        try
+        {
+            var client = _httpClientFactory.CreateClient("BurLunchAPI");
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(dates, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await client.PostAsync("Schedule/BulkDelete", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok(new { Message = "Расписания успешно удалены." });
+            }
+
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            return StatusCode((int)response.StatusCode, $"Ошибка при удалении расписания: {errorMessage}");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Произошла ошибка: {ex.Message}");
+        }
     }
-
-
-
 
 }

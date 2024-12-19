@@ -56,28 +56,6 @@ public class ScheduleController : ControllerBase
         return CreatedAtAction(nameof(GetScheduleById), new { id = schedule.Id }, schedule);
     }
 
-    //[HttpPost("BulkCreate")]
-    //public IActionResult BulkCreateSchedules([FromBody] List<CreateScheduleRequest> schedules)
-    //{
-    //    if (schedules == null || schedules.Count == 0)
-    //        return BadRequest("Данные для создания расписания отсутствуют.");
-
-    //    foreach (var scheduleData in schedules)
-    //    {
-    //        var schedule = new Schedule
-    //        {
-    //            Date =  scheduleData.Date,
-    //            WeeklyMenuId = scheduleData.WeeklyMenuId
-    //        };
-
-    //        _context.Schedules.Add(schedule);
-    //    }
-
-    //    _context.SaveChanges();
-
-    //    return Ok(new { Message = "Расписания успешно созданы." });
-    //}
-
     [HttpPost("BulkCreate")]
     public IActionResult BulkCreateSchedules([FromBody] List<CreateScheduleRequest> schedules)
     {
@@ -133,4 +111,26 @@ public class ScheduleController : ControllerBase
 
         return Ok(new { Message = "Расписание успешно удалено" });
     }
+
+    [HttpPost("BulkDelete")]
+    public IActionResult BulkDeleteSchedules([FromBody] List<DateTime> dates)
+    {
+        if (dates == null || dates.Count == 0)
+            return BadRequest("Даты для удаления отсутствуют.");
+
+        foreach (var date in dates)
+        {
+            var schedules = _context.Schedules.Where(s => s.Date.Date == date.Date).ToList();
+
+            if (schedules.Any())
+            {
+                _context.Schedules.RemoveRange(schedules);
+            }
+        }
+
+        _context.SaveChanges();
+
+        return Ok(new { Message = "Расписания успешно удалены." });
+    }
+
 }
