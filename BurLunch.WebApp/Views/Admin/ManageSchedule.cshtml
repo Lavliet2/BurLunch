@@ -1,22 +1,29 @@
-﻿<h2 class="text-center mb-4">
-    <span id="prevMonth" style="cursor: pointer; margin-right: 10px;">&#8592;</span>
-    Расписание бизнес-ланчей: <span id="monthYear"></span>
-    <span id="nextMonth" style="cursor: pointer; margin-left: 10px;">&#8594;</span>
-</h2>
-<table class="table table-bordered text-center" id="calendar-table">
-    <thead>
-        <tr>
-            <th>Пн</th>
-            <th>Вт</th>
-            <th>Ср</th>
-            <th>Чт</th>
-            <th>Пт</th>
-            <th class="text-danger">Сб</th>
-            <th class="text-danger">Вс</th>
-        </tr>
-    </thead>
-    <tbody id="calendar-body"></tbody>
-</table>
+﻿<h2 class="text-center" id="monthYear"></h2>
+<div class="d-flex align-items-center">
+    <button id="prevMonth" class="btn btn-light ms-2">
+        <i class="bi bi-chevron-compact-left"></i>
+    </button>
+    <div class="flex-grow-1">
+        <table class="table table-bordered text-center" id="calendar-table">
+            <thead>
+                <tr>
+                    <th>Пн</th>
+                    <th>Вт</th>
+                    <th>Ср</th>
+                    <th>Чт</th>
+                    <th>Пт</th>
+                    <th class="text-danger">Сб</th>
+                    <th class="text-danger">Вс</th>
+                </tr>
+            </thead>
+            <tbody id="calendar-body"></tbody>
+        </table>
+    </div>
+    <button id="nextMonth" class="btn btn-light me-2">
+        <i class="bi bi-chevron-compact-right"></i>
+    </button>
+</div>
+
 
 <div class="text-center mt-3">
     <button id="addLunchBtn" class="btn btn-secondary" disabled data-bs-toggle="modal" data-bs-target="#businessLunchModal">
@@ -172,8 +179,10 @@
 
             if (selectedDays.size > 0 && hasDaysWithoutSchedule) {
                 addLunchBtn.removeAttribute("disabled");
+                addLunchBtn.classList.add("btn-active");
             } else {
                 addLunchBtn.setAttribute("disabled", "true");
+                addLunchBtn.classList.remove("btn-active");
             }
         }
 
@@ -314,8 +323,8 @@
     }
 
     .selected-day {
-        background-color: darkgray !important; /* Светло-зелёный цвет для выделения */
-        color: white !important; /* Белый текст для контраста */
+        background-color: darkgray !important; 
+        color: white !important; 
     }
 
     .weekend-day {
@@ -330,13 +339,32 @@
         border: none;
     }
 
-        .btn-active:hover {
-            background-color: #009900;
-        }
+    .btn-active:hover {
+        background-color: #009900;
+    }
 
     .has-schedule {
         background-color: #4CAF50 !important;
-        color: #000;
+        /* color: white; */
         font-weight: bold;
     }
+
+    #prevMonth, #nextMonth {
+        font-size: 24px; 
+        color: #CE0E2D;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        border: none; 
+        background: none;
+    }
+
+    #prevMonth:hover, #nextMonth:hover {
+            color: #A10D20;
+        }
+
+    #prevMonth:focus, #nextMonth:focus {
+        outline: none; 
+        box-shadow: none;
+    }
+
 </style>
