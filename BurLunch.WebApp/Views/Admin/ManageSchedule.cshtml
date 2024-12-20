@@ -97,108 +97,144 @@
             }
         }
 
-        async function generateCalendar() {
-            calendarBody.innerHTML = ""; // Очищаем календарь
-            const schedules = await fetchSchedules();
-            const scheduleDates = schedules.map(schedule => new Date(schedule.date).toISOString().split('T')[0]);
+    async function generateCalendar() {
+        calendarBody.innerHTML = ""; // Очищаем календарь
+        const schedules = await fetchSchedules();
 
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            let day = 1;
+        // Преобразуем даты расписаний в формат YYYY-MM-DD без учета времени
+        const scheduleDates = schedules.map(schedule => {
+            const localDate = new Date(schedule.date);
+            localDate.setUTCHours(0, 0, 0, 0); // Устанавливаем время на начало дня UTC
+            return localDate.toISOString().split('T')[0];
+        });
 
-            for (let i = 0; i < 6; i++) {
-                const row = document.createElement("tr");
-                for (let j = 0; j < 7; j++) {
-                    const cell = document.createElement("td");
-                    cell.classList.add("calendar-day");
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        let day = 1;
 
-                    if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
-                        cell.textContent = "";
-                    } else if (day <= daysInMonth) {
-                        cell.textContent = day;
+        for (let i = 0; i < 6; i++) {
+            const row = document.createElement("tr");
+            for (let j = 0; j < 7; j++) {
+                const cell = document.createElement("td");
+                cell.classList.add("calendar-day");
 
-                        if (j === 5 || j === 6) {
-                            cell.classList.add("weekend-day");
-                        }
+                if (i === 0 && j < (firstDay === 0 ? 6 : firstDay - 1)) {
+                    cell.textContent = "";
+                } else if (day <= daysInMonth) {
+                    cell.textContent = day;
 
-                        const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0];
-                        cell.setAttribute("data-day", day);
-
-                        if (scheduleDates.includes(fullDate)) {
-                            cell.classList.add("has-schedule");
-                        }
-
-                        cell.addEventListener("mousedown", () => {
-                            isMouseDown = true;
-                            toggleDaySelection(cell);
-                        });
-
-                        cell.addEventListener("mouseover", () => {
-                            if (isMouseDown) toggleDaySelection(cell);
-                        });
-
-                        cell.addEventListener("mouseup", () => {
-                            isMouseDown = false;
-                        });
-
-                        day++;
+                    if (j === 5 || j === 6) {
+                        cell.classList.add("weekend-day");
                     }
-                    row.appendChild(cell);
-                }
-                calendarBody.appendChild(row);
-            }
 
-            document.addEventListener("mouseup", () => {
-                isMouseDown = false;
-            });
-            updateAddLunchButton();
-            updateRemoveLunchButton();
+                    const fullDate = new Date(currentYear, currentMonth, day);
+                    const isoDate = new Date(
+                        fullDate.getFullYear(),
+                        fullDate.getMonth(),
+                        fullDate.getDate(),
+                        12, 0, 0
+                    ).toISOString().split('T')[0];
+
+                    cell.setAttribute("data-day", day);
+
+                    if (scheduleDates.includes(isoDate)) {
+                        cell.classList.add("has-schedule");
+                    }
+
+                    cell.addEventListener("mousedown", () => {
+                        isMouseDown = true;
+                        toggleDaySelection(cell);
+                    });
+
+                    cell.addEventListener("mouseover", () => {
+                        if (isMouseDown) toggleDaySelection(cell);
+                    });
+
+                    cell.addEventListener("mouseup", () => {
+                        isMouseDown = false;
+                    });
+
+                    day++;
+                }
+                row.appendChild(cell);
+            }
+            calendarBody.appendChild(row);
         }
 
-        function toggleDaySelection(cell) {
-            const day = cell.getAttribute("data-day");
-            const fullDate = new Date(currentYear, currentMonth, day).toISOString().split('T')[0];
+        document.addEventListener("mouseup", () => {
+            isMouseDown = false;
+        });
+        updateAddLunchButton();
+        updateRemoveLunchButton();
+    }
 
-            if (selectedDays.has(fullDate)) {
-                selectedDays.delete(fullDate);
+
+        function toggleDaySelection(cell) {
+            const day = parseInt(cell.getAttribute("data-day"), 10); // Преобразуем строку в число
+            // Создаем дату вручную с корректной интерпретацией дня
+            const fullDate = new Date(currentYear, currentMonth, day);
+
+            // Преобразуем дату в формат ISO, чтобы избежать проблем с часовыми поясами
+            const isoDate = new Date(
+                fullDate.getFullYear(),
+                fullDate.getMonth(),
+                fullDate.getDate(),
+                12, 0, 0 // Устанавливаем время на середину дня, чтобы избежать смещения
+            ).toISOString().split('T')[0];
+
+            console.log(`Выбранная дата: ${isoDate}`); // Логируем дату для проверки
+
+            if (selectedDays.has(isoDate)) {
+                selectedDays.delete(isoDate);
                 cell.classList.remove("selected-day");
             } else {
-                selectedDays.add(fullDate);
+                selectedDays.add(isoDate);
                 cell.classList.add("selected-day");
             }
             updateAddLunchButton();
             updateRemoveLunchButton();
         }
 
-        function updateAddLunchButton() {
-            const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell =>
-                new Date(currentYear, currentMonth, cell.getAttribute("data-day")).toISOString().split('T')[0]
-            );
 
-            const hasDaysWithoutSchedule = Array.from(selectedDays).some(date => !scheduleDates.includes(date));
+    function updateAddLunchButton() {
+        const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell => {
+            const day = parseInt(cell.getAttribute("data-day"), 10);
+            const fullDate = new Date(currentYear, currentMonth, day);
+            return fullDate.toISOString().split('T')[0];
+        });
 
-            if (selectedDays.size > 0 && hasDaysWithoutSchedule) {
-                addLunchBtn.removeAttribute("disabled");
-                addLunchBtn.classList.add("btn-active");
-            } else {
-                addLunchBtn.setAttribute("disabled", "true");
-                addLunchBtn.classList.remove("btn-active");
-            }
+        const hasDaysWithoutSchedule = Array.from(selectedDays).some(date => !scheduleDates.includes(date));
+
+        if (selectedDays.size > 0 && hasDaysWithoutSchedule) {
+            addLunchBtn.removeAttribute("disabled");
+            addLunchBtn.classList.add("btn-active");
+        } else {
+            addLunchBtn.setAttribute("disabled", "true");
+            addLunchBtn.classList.remove("btn-active");
         }
+    }
 
-        function updateRemoveLunchButton() {
-            const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell =>
-                new Date(currentYear, currentMonth, cell.getAttribute("data-day")).toISOString().split('T')[0]
-            );
+    function updateRemoveLunchButton() {
+        const scheduleDates = Array.from(document.querySelectorAll(".has-schedule")).map(cell => {
+            const day = parseInt(cell.getAttribute("data-day"), 10);
+            const fullDate = new Date(currentYear, currentMonth, day, 12, 0, 0); // Середина дня для избежания смещений
+            return fullDate.toISOString().split('T')[0];
+        });
 
-            const hasDaysWithSchedule = Array.from(selectedDays).some(date => scheduleDates.includes(date));
+        const hasDaysWithSchedule = Array.from(selectedDays).some(date => {
+            const localDate = new Date(date); // Конвертируем выбранную дату
+            localDate.setUTCHours(0, 0, 0, 0); // Устанавливаем время на начало дня в UTC
+            const formattedDate = localDate.toISOString().split('T')[0]; // Преобразуем в ISO-формат
+            return scheduleDates.includes(formattedDate); // Сравниваем
+        });
 
-            if (selectedDays.size > 0 && hasDaysWithSchedule) {
-                removeLunchBtn.removeAttribute("disabled");
-            } else {
-                removeLunchBtn.setAttribute("disabled", "true");
-            }
+        if (selectedDays.size > 0 && hasDaysWithSchedule) {
+            removeLunchBtn.removeAttribute("disabled");
+        } else {
+            removeLunchBtn.setAttribute("disabled", "true");
         }
+    }
+
 
         prevMonthButton.addEventListener("click", () => {
             currentMonth--;
@@ -262,32 +298,40 @@
                 });
         });
 
-        function sendScheduleCreationRequest() {
-            if (!selectedWeeklyMenuId || selectedDays.size === 0) {
-                alert("Выберите дни и бизнес-ланч.");
-                return;
-            }
-
-            const payload = Array.from(selectedDays).map(date => {
-                const localDate = new Date(date);
-                const isoDate = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}T00:00:00`;
-                return {
-                    date: isoDate,
-                    weeklyMenuId: parseInt(selectedWeeklyMenuId)
-                };
-            });
-
-            fetch('/Admin/CreateSchedules', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
-            })
-                .then(response => response.ok ? response.json() : Promise.reject(response))
-                .then(() => location.reload())
-                .catch(() => alert("Ошибка при создании расписаний."));
+    function sendScheduleCreationRequest() {
+        if (!selectedWeeklyMenuId || selectedDays.size === 0) {
+            alert("Выберите дни и бизнес-ланч.");
+            return;
         }
+        
+
+        const payload = Array.from(selectedDays).map(date => {
+            const localDate = new Date(date);
+            // Устанавливаем время в UTC, чтобы исключить влияние часового пояса
+            localDate.setUTCHours(0, 0, 0, 0);
+            const formattedDate = localDate.toISOString().split('T')[0]; // Форматируем как YYYY-MM-DD
+
+            return {
+                date: formattedDate, // Передаём только дату без времени
+                weeklyMenuId: parseInt(selectedWeeklyMenuId)
+            };
+        });
+        console.log("Отправляемые данные:", JSON.stringify(payload));
+        fetch('/Admin/CreateSchedules', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.ok ? response.json() : Promise.reject(response))
+            .then(() => location.reload())
+            .catch(() => alert("Ошибка при создании расписаний."));
+    }
+
+
+        
+
 
         removeLunchBtn.addEventListener("click", () => {
             if (selectedDays.size === 0) {
@@ -360,7 +404,7 @@
 
     #prevMonth:hover, #nextMonth:hover {
             color: #A10D20;
-        }
+    }
 
     #prevMonth:focus, #nextMonth:focus {
         outline: none; 

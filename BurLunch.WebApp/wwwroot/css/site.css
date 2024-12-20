@@ -20,3 +20,26 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.no-menu {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.no-menu h2 {
+    color: #7B868C;
+    margin-bottom: 20px;
+}
+
+.no-menu .btn {
+    background-color: #CE0E2D;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.no-menu .btn:hover {
+    background-color: #A10D20;
+}

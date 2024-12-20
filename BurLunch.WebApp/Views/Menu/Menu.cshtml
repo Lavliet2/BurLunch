@@ -1,0 +1,29 @@
+﻿@using BurLunch.AuthAPI.Models
+@model WeeklyMenuCard
+
+<h2 class="text-center mt-3">Меню на @ViewBag.Date.ToString("dd.MM.yyyy")</h2>
+
+<div class="card mt-4">
+    <div class="card-header" style="background-color: #CE0E2D; color: white;">
+        <h4>@Model.Name</h4>
+    </div>
+    <div class="card-body">
+        @if (Model.Dishes.Any())
+        {
+            <ul class="list-group">
+                @foreach (var dish in Model.Dishes)
+                {
+                    <li class="list-group-item">
+                        <h5>@dish.Name</h5>
+                        <p class="text-muted">@dish.DishType?.Name</p>
+                        <p>@dish.Description</p>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="text-muted">Блюда не добавлены.</p>
+        }
+    </div>
+</div>

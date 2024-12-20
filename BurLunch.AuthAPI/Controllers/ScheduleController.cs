@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using BurLunch.AuthAPI.Data;
 using BurLunch.AuthAPI.Models;
+using BurLunch.AuthAPI.Utils;
+using System.Text.Json;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -41,6 +43,37 @@ public class ScheduleController : ControllerBase
             return NotFound("Расписание не найдено");
 
         return Ok(schedule);
+    }
+
+    // Получить расписание по дате
+    [HttpGet("ByDate")]
+    public async Task<IActionResult> GetScheduleByDate([FromQuery] string date)
+    {
+        try
+        {
+            // Используем конвертер для преобразования строки в дату
+            var parsedDate = JsonSerializer.Deserialize<DateTime>(
+                $"\"{date}\"",
+                new JsonSerializerOptions
+                {
+                    Converters = { new FlexibleDateTimeConverter() }
+                }
+            );
+
+            var targetDate = parsedDate.Date; // Учитываем только дату
+            var schedule = await _context.Schedules
+                .Include(s => s.WeeklyMenu) // Подгружаем меню
+                .FirstOrDefaultAsync(s => s.Date.Date == targetDate);
+
+            if (schedule == null)
+                return NotFound(new { Message = $"Расписание на {targetDate:dd.MM.yyyy} не создано." });
+
+            return Ok(schedule);
+        }
+        catch (JsonException ex)
+        {
+            return BadRequest(new { Message = $"Неверный формат даты: {date}. Ошибка: {ex.Message}" });
+        }
     }
 
     // Создать расписание
