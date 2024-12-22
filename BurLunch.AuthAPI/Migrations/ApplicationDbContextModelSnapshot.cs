@@ -41,14 +41,9 @@ namespace BurLunch.AuthAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("TableReservationId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DishTypeId");
-
-                    b.HasIndex("TableReservationId");
 
                     b.ToTable("Dishes");
 
@@ -320,6 +315,21 @@ namespace BurLunch.AuthAPI.Migrations
                     b.ToTable("DishWeeklyMenuCard");
                 });
 
+            modelBuilder.Entity("TableReservationDish", b =>
+                {
+                    b.Property<int>("DishId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TableReservationId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("DishId", "TableReservationId");
+
+                    b.HasIndex("TableReservationId");
+
+                    b.ToTable("TableReservationDish");
+                });
+
             modelBuilder.Entity("BurLunch.AuthAPI.Models.Dish", b =>
                 {
                     b.HasOne("BurLunch.AuthAPI.Models.DishType", "DishType")
@@ -327,10 +337,6 @@ namespace BurLunch.AuthAPI.Migrations
                         .HasForeignKey("DishTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("BurLunch.AuthAPI.Models.TableReservation", null)
-                        .WithMany("SelectedDishes")
-                        .HasForeignKey("TableReservationId");
 
                     b.Navigation("DishType");
                 });
@@ -351,13 +357,13 @@ namespace BurLunch.AuthAPI.Migrations
                     b.HasOne("BurLunch.AuthAPI.Models.Schedule", "Schedule")
                         .WithMany("TableReservations")
                         .HasForeignKey("ScheduleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BurLunch.AuthAPI.Models.Table", "Table")
                         .WithMany()
                         .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BurLunch.AuthAPI.Models.User", "User")
@@ -388,6 +394,21 @@ namespace BurLunch.AuthAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TableReservationDish", b =>
+                {
+                    b.HasOne("BurLunch.AuthAPI.Models.Dish", null)
+                        .WithMany()
+                        .HasForeignKey("DishId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BurLunch.AuthAPI.Models.TableReservation", null)
+                        .WithMany()
+                        .HasForeignKey("TableReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("BurLunch.AuthAPI.Models.DishType", b =>
                 {
                     b.Navigation("Dishes");
@@ -396,11 +417,6 @@ namespace BurLunch.AuthAPI.Migrations
             modelBuilder.Entity("BurLunch.AuthAPI.Models.Schedule", b =>
                 {
                     b.Navigation("TableReservations");
-                });
-
-            modelBuilder.Entity("BurLunch.AuthAPI.Models.TableReservation", b =>
-                {
-                    b.Navigation("SelectedDishes");
                 });
 #pragma warning restore 612, 618
         }

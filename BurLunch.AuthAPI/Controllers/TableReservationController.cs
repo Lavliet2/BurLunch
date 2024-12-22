@@ -82,6 +82,40 @@ public class TableReservationController : ControllerBase
 
     //    return Ok(result);
     //}
+    //[HttpGet("reservations/{scheduleId}")]
+    //public async Task<IActionResult> GetReservations(int scheduleId)
+    //{
+    //    var reservations = await _context.TableReservations
+    //        .Include(tr => tr.Table)
+    //        .Include(tr => tr.User)
+    //        .Include(tr => tr.SelectedDishes) // Включаем связанные блюда
+    //        .Where(tr => tr.ScheduleId == scheduleId)
+    //        .Select(r => new
+    //        {
+    //            r.Id,
+    //            r.ScheduleId,
+    //            r.TableId,
+    //            Table = new
+    //            {
+    //                r.Table.Id,
+    //                r.Table.Seats,
+    //                r.Table.Description
+    //            },
+    //            r.UserId,
+    //            r.SeatsReserved,
+    //            r.ReservationTime,
+    //            SelectedDishes = r.SelectedDishes.Select(d => new
+    //            {
+    //                d.Id,
+    //                d.Name,
+    //                d.Description,
+    //                DishType = d.DishType.Name
+    //            })
+    //        })
+    //        .ToListAsync();
+
+    //    return Ok(reservations);
+    //}
     [HttpGet("reservations/{scheduleId}")]
     public async Task<IActionResult> GetReservations(int scheduleId)
     {
@@ -102,13 +136,15 @@ public class TableReservationController : ControllerBase
                     r.Table.Description
                 },
                 r.UserId,
+                r.User.Username, // UserName доступен
                 r.SeatsReserved,
                 r.ReservationTime,
                 SelectedDishes = r.SelectedDishes.Select(d => new
                 {
                     d.Id,
                     d.Name,
-                    d.Description
+                    d.Description,
+                    DishType = d.DishType.Name
                 })
             })
             .ToListAsync();

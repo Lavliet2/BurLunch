@@ -132,15 +132,17 @@ public class MenuController : Controller
 
         // Запрос списка бронирований
         var reservationsResponse = await client.GetAsync($"/api/TableReservation/reservations/{schedule.Id}");
-        var reservations = new List<TableReservation>();
+        var reservations = new List<RawReservation>();
         if (reservationsResponse.IsSuccessStatusCode)
         {
-            reservations = JsonSerializer.Deserialize<List<TableReservation>>(
+            reservations = JsonSerializer.Deserialize<List<RawReservation>>(
                 await reservationsResponse.Content.ReadAsStringAsync(),
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
         }
 
+
+        // Добавьте десериализованные данные в модель представления
         var viewModel = new MenuWithTablesViewModel
         {
             Menu = weeklyMenuCard,
@@ -149,9 +151,11 @@ public class MenuController : Controller
             Reservations = reservations
         };
 
+
         ViewBag.Date = targetDate;
         return View("Menu", viewModel);
     }
+
 
     [HttpPost]
     public async Task<IActionResult> ReserveTable([FromBody] TableReservation request)

@@ -39,19 +39,36 @@ namespace BurLunch.AuthAPI.Data
                 new DishType { Id = 4, Name = "Напиток" }
             );
 
+            modelBuilder.Entity<TableReservation>()
+                .HasMany(tr => tr.SelectedDishes)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "TableReservationDish", // Имя промежуточной таблицы
+                    j => j
+                        .HasOne<Dish>() // Промежуточная таблица связана с Dish
+                        .WithMany()
+                        .HasForeignKey("DishId")
+                        .OnDelete(DeleteBehavior.Restrict), // Блюда не удаляются
+                    j => j
+                        .HasOne<TableReservation>() // Промежуточная таблица связана с TableReservation
+                        .WithMany()
+                        .HasForeignKey("TableReservationId")
+                        .OnDelete(DeleteBehavior.Cascade) // При удалении бронирования связи удаляются
+            );
+
             // Связь TableReservation -> Schedule
             modelBuilder.Entity<TableReservation>()
                 .HasOne(tr => tr.Schedule)
                 .WithMany(s => s.TableReservations)
                 .HasForeignKey(tr => tr.ScheduleId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Связь TableReservation -> Table
             modelBuilder.Entity<TableReservation>()
                 .HasOne(tr => tr.Table)
                 .WithMany()
                 .HasForeignKey(tr => tr.TableId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Начальные данные для User
             modelBuilder.Entity<User>().HasData(new User
@@ -89,34 +106,6 @@ namespace BurLunch.AuthAPI.Data
             modelBuilder.Entity<WeeklyMenuCard>().HasData(
                 new WeeklyMenuCard { Id = 9999, Name = "Бизнес-ланч #9999" }
             );
-
-            //// Связь блюд с карточкой меню (таблица многие-ко-многим)
-            //modelBuilder.Entity("WeeklyMenuCardDish").HasData(
-            //    new { WeeklyMenuCardId = 1, DishesId = 1 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 2 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 3 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 4 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 5 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 6 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 7 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 8 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 9 },
-            //    new { WeeklyMenuCardId = 1, DishesId = 10 }
-            //);
-
-            //// Связь блюд с карточкой меню
-            //modelBuilder.Entity<Dish>().HasData(
-            //    new Dish { Id = 1, Name = "Ачичук", Description = "Из свежих овощей", DishTypeId = 3 },
-            //    new Dish { Id = 2, Name = "Оливье", Description = "", DishTypeId = 3 },
-            //    new Dish { Id = 3, Name = "Деревенский", Description = "", DishTypeId = 3 },
-            //    new Dish { Id = 4, Name = "Чучвара", Description = "По домашнему с фрикадельками и лапшой", DishTypeId = 1 },
-            //    new Dish { Id = 5, Name = "Мастава", Description = "Грузинский суп с куриным филе", DishTypeId = 1 },
-            //    new Dish { Id = 6, Name = "Стейк из горбуши", Description = "С овощным миксом", DishTypeId = 2 },
-            //    new Dish { Id = 7, Name = "Плов", Description = "Из курицы", DishTypeId = 2 },
-            //    new Dish { Id = 8, Name = "Дамляма", Description = "Из курицы", DishTypeId = 2 },
-            //    new Dish { Id = 9, Name = "Чай", Description = "Напиток дня", DishTypeId = 4 },
-            //    new Dish { Id = 10, Name = "Морс", Description = "Из клюквы", DishTypeId = 4 }
-            //);
         }
     }
 }
