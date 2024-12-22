@@ -98,7 +98,7 @@
         }
 
     async function generateCalendar() {
-        calendarBody.innerHTML = ""; // Очищаем календарь
+        calendarBody.innerHTML = "";
         const schedules = await fetchSchedules();
 
         // Преобразуем даты расписаний в формат YYYY-MM-DD без учета времени
@@ -182,7 +182,7 @@
                 12, 0, 0 // Устанавливаем время на середину дня, чтобы избежать смещения
             ).toISOString().split('T')[0];
 
-            console.log(`Выбранная дата: ${isoDate}`); // Логируем дату для проверки
+            console.log(`Выбранная дата: ${isoDate}`);
 
             if (selectedDays.has(isoDate)) {
                 selectedDays.delete(isoDate);

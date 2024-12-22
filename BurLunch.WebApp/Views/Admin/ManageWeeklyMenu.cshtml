@@ -149,7 +149,7 @@ else
 
         .add-new-card:hover {
             transform: scale(1.05);
-            background-color: #f8d7da; /* Светло-красный цвет при наведении */
+            background-color: #f8d7da;
         }
 
     </style>
@@ -158,8 +158,8 @@ else
             var addDishModal = document.getElementById('addDishModal');
 
             addDishModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget; // Кнопка, которая открыла модал
-                var weeklyMenuId = button.getAttribute('data-weeklymenuid'); // ID бизнес-ланча
+                var button = event.relatedTarget;
+                var weeklyMenuId = button.getAttribute('data-weeklymenuid');
 
                 var dishListContainer = document.getElementById("dishListContainer");
                 dishListContainer.innerHTML = `
@@ -170,7 +170,6 @@ else
                     </div>
                 `;
 
-                // Запрос на сервер
                 fetch(`/Admin/GetAvailableDishes?weeklyMenuId=${weeklyMenuId}`)
                     .then(response => response.text())
                     .then(data => {

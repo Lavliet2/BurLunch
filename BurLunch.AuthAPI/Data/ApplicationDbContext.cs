@@ -14,11 +14,7 @@ namespace BurLunch.AuthAPI.Data
         public DbSet<Table> Tables { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<TableReservation> TableReservations { get; set; }
-        public DbSet<WeeklyMenuCard> WeeklyMenuCards { get; set; }
-        
-
-
-
+        public DbSet<WeeklyMenuCard> WeeklyMenuCards { get; set; }        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,9 +25,8 @@ namespace BurLunch.AuthAPI.Data
                 .HasOne(d => d.DishType)
                 .WithMany(dt => dt.Dishes)
                 .HasForeignKey(d => d.DishTypeId)
-                .OnDelete(DeleteBehavior.Restrict); // Запрещаем каскадное удаление DishType
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Начальные данные для DishType
             modelBuilder.Entity<DishType>().HasData(
                 new DishType { Id = 3, Name = "Салат" },
                 new DishType { Id = 1, Name = "Суп" },
@@ -43,17 +38,17 @@ namespace BurLunch.AuthAPI.Data
                 .HasMany(tr => tr.SelectedDishes)
                 .WithMany()
                 .UsingEntity<Dictionary<string, object>>(
-                    "TableReservationDish", // Имя промежуточной таблицы
+                    "TableReservationDish", 
                     j => j
-                        .HasOne<Dish>() // Промежуточная таблица связана с Dish
+                        .HasOne<Dish>() 
                         .WithMany()
                         .HasForeignKey("DishId")
-                        .OnDelete(DeleteBehavior.Restrict), // Блюда не удаляются
+                        .OnDelete(DeleteBehavior.Restrict),
                     j => j
-                        .HasOne<TableReservation>() // Промежуточная таблица связана с TableReservation
+                        .HasOne<TableReservation>()
                         .WithMany()
                         .HasForeignKey("TableReservationId")
-                        .OnDelete(DeleteBehavior.Cascade) // При удалении бронирования связи удаляются
+                        .OnDelete(DeleteBehavior.Cascade)
             );
 
             // Связь TableReservation -> Schedule
@@ -83,12 +78,7 @@ namespace BurLunch.AuthAPI.Data
             modelBuilder.Entity<Table>().HasData(
                 new Table { Id = 9999, Seats = 4, Description = "Стол 1 из 4 мест" }
             );
-            // Добавляем запись о бронировании стола пользователем Admin
-            //modelBuilder.Entity<TableReservation>().HasData(
-            //    new TableReservation { Id = 1, TableId = 9999, UserId = 1 }
-            //);
 
-            // Добавляем начальные блюда
             modelBuilder.Entity<Dish>().HasData(
                 new Dish { Id = 1, Name = "Ачичук", Description = "Из свежих овощей", DishTypeId = 3 },
                 new Dish { Id = 2, Name = "Оливье", Description = "", DishTypeId = 3 },
@@ -102,7 +92,6 @@ namespace BurLunch.AuthAPI.Data
                 new Dish { Id = 10, Name = "Морс", Description = "Из клюквы", DishTypeId = 4 }
             );
 
-            // Инициализация карточки меню на неделю (Бизнес-ланч #1)
             modelBuilder.Entity<WeeklyMenuCard>().HasData(
                 new WeeklyMenuCard { Id = 9999, Name = "Бизнес-ланч #9999" }
             );

@@ -14,17 +14,6 @@ public class WeeklyMenuController : ControllerBase
         _context = context;
     }
 
-    // Получить все карточки недельного меню
-    //[HttpGet]
-    //public IActionResult GetWeeklyMenus()
-    //{
-    //    var weeklyMenus = _context.WeeklyMenuCards
-    //        .Include(w => w.Dishes) // Подгружаем список блюд
-    //        .ThenInclude(d => d.DishType) // Подгружаем типы блюд
-    //        .ToList();
-
-    //    return Ok(weeklyMenus);
-    //}
     [HttpGet]
     public IActionResult GetWeeklyMenus()
     {
@@ -93,7 +82,6 @@ public class WeeklyMenuController : ControllerBase
         return Ok(availableDishes);
     }
 
-    // Добавить новую карточку недельного меню
     [HttpPost]
     public IActionResult AddWeeklyMenu([FromBody] WeeklyMenuCard weeklyMenu)
     {
@@ -108,7 +96,6 @@ public class WeeklyMenuController : ControllerBase
         return CreatedAtAction(nameof(GetWeeklyMenus), new { id = weeklyMenu.Id }, weeklyMenu);
     }
 
-    // Добавить блюдо в карточку меню
     [HttpPost("{menuId}/add-dish")]
     public IActionResult AddDishToMenu(int menuId, [FromBody] int dishId)
     {
@@ -126,7 +113,7 @@ public class WeeklyMenuController : ControllerBase
 
         return Ok(menu);
     }
-    // Удалить блюдо из карточки меню
+
     [HttpDelete("{menuId}/remove-dish/{dishId}")]
     public IActionResult RemoveDishFromMenu(int menuId, int dishId)
     {
@@ -142,7 +129,6 @@ public class WeeklyMenuController : ControllerBase
         return Ok(menu);
     }
 
-    // Редактировать название карточки меню
     [HttpPut("{id}")]
     public IActionResult EditWeeklyMenu(int id, [FromBody] WeeklyMenuCard updatedMenu)
     {
@@ -160,12 +146,11 @@ public class WeeklyMenuController : ControllerBase
         return Ok(new { Message = "Карточка меню успешно обновлена." });
     }
 
-    // Удалить карточку недельного меню
     [HttpDelete("{id}")]
     public IActionResult DeleteWeeklyMenu(int id)
     {
         var menu = _context.WeeklyMenuCards
-            .Include(w => w.Dishes) // Подгружаем список блюд
+            .Include(w => w.Dishes)
             .FirstOrDefault(w => w.Id == id);
 
         if (menu == null)

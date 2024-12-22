@@ -2,21 +2,15 @@
 {
     public class TableReservation
     {
-        public int Id { get; set; } // ID записи брони.
-
+        public int Id { get; set; } 
         public int ScheduleId { get; set; }
-        public Schedule Schedule { get; set; } // Связь с расписанием.
-
+        public Schedule Schedule { get; set; }
         public int TableId { get; set; }
-        public Table Table { get; set; } // Стол, который был забронирован.
-
+        public Table Table { get; set; }
         public int UserId { get; set; }
-        public User User { get; set; } // Пользователь, забронировавший места.
-
-        public int SeatsReserved { get; set; } // Количество забронированных мест.
-
-        public DateTime ReservationTime { get; set; } // Время бронирования.
-
-        public ICollection<Dish> SelectedDishes { get; set; } = new List<Dish>(); // Список выбранных блюд.
+        public User User { get; set; }
+        public int SeatsReserved { get; set; }
+        public DateTime ReservationTime { get; set; }
+        public ICollection<Dish> SelectedDishes { get; set; } = new List<Dish>();
     }
 }

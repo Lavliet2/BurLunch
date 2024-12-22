@@ -16,7 +16,6 @@ public class ScheduleController : ControllerBase
         _context = context;
     }
 
-    // Получить список расписаний
     [HttpGet]
     public async Task<IActionResult> GetSchedules()
     {
@@ -29,7 +28,6 @@ public class ScheduleController : ControllerBase
         return Ok(schedules);
     }
 
-    // Получить расписание по ID
     [HttpGet("{id}")]
     public async Task<IActionResult> GetScheduleById(int id)
     {
@@ -45,13 +43,11 @@ public class ScheduleController : ControllerBase
         return Ok(schedule);
     }
 
-    // Получить расписание по дате
     [HttpGet("ByDate")]
     public async Task<IActionResult> GetScheduleByDate([FromQuery] string date)
     {
         try
         {
-            // Используем конвертер для преобразования строки в дату
             var parsedDate = JsonSerializer.Deserialize<DateTime>(
                 $"\"{date}\"",
                 new JsonSerializerOptions
@@ -60,9 +56,9 @@ public class ScheduleController : ControllerBase
                 }
             );
 
-            var targetDate = parsedDate.Date; // Учитываем только дату
+            var targetDate = parsedDate.Date; 
             var schedule = await _context.Schedules
-                .Include(s => s.WeeklyMenu) // Подгружаем меню
+                .Include(s => s.WeeklyMenu) 
                 .FirstOrDefaultAsync(s => s.Date.Date == targetDate);
 
             if (schedule == null)
@@ -76,7 +72,6 @@ public class ScheduleController : ControllerBase
         }
     }
 
-    // Создать расписание
     [HttpPost]
     public async Task<IActionResult> CreateSchedule([FromBody] Schedule schedule)
     {
@@ -97,12 +92,10 @@ public class ScheduleController : ControllerBase
 
         foreach (var scheduleData in schedules)
         {
-            // Преобразуем дату в UTC
             var utcDate = scheduleData.Date.ToUniversalTime();
-
             var schedule = new Schedule
             {
-                Date = utcDate, // Сохраняем дату в формате UTC
+                Date = utcDate, 
                 WeeklyMenuId = scheduleData.WeeklyMenuId
             };
 
@@ -114,8 +107,6 @@ public class ScheduleController : ControllerBase
         return Ok(new { Message = "Расписания успешно созданы." });
     }
 
-
-    // Обновить расписание
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateSchedule(int id, [FromBody] Schedule updatedSchedule)
     {
@@ -131,7 +122,6 @@ public class ScheduleController : ControllerBase
         return Ok(new { Message = "Расписание успешно обновлено" });
     }
 
-    // Удалить расписание
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSchedule(int id)
     {
@@ -165,5 +155,4 @@ public class ScheduleController : ControllerBase
 
         return Ok(new { Message = "Расписания успешно удалены." });
     }
-
 }

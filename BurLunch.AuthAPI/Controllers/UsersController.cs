@@ -31,7 +31,6 @@ public class UsersController : ControllerBase
             return Unauthorized(new { Message = "Неправильное имя пользователя или пароль" });
         }
 
-        // Возвращаем только необходимые данные пользователя
         return Ok(new
         {
             user.Id,
@@ -84,7 +83,6 @@ public class UsersController : ControllerBase
             return BadRequest("Все поля должны быть заполнены.");
         }
 
-        // Проверяем, существует ли пользователь с таким именем
         if (_context.Users.Any(u => u.Username == user.Username))
         {
             return Conflict("Пользователь с таким именем уже существует.");

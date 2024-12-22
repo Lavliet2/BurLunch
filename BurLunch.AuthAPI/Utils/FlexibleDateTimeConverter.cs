@@ -12,11 +12,9 @@ namespace BurLunch.AuthAPI.Utils
             if (string.IsNullOrEmpty(dateString))
                 throw new JsonException("Дата не может быть пустой.");
 
-            // Попробуем несколько форматов
             if (DateTime.TryParse(dateString, out var parsedDate))
-                return DateTime.SpecifyKind(parsedDate, DateTimeKind.Utc); // Всегда возвращаем дату в UTC
+                return DateTime.SpecifyKind(parsedDate, DateTimeKind.Utc);
 
-            // Если формат не подходит, выбрасываем исключение
             throw new JsonException($"Неверный формат даты: {dateString}");
         }
 

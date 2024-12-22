@@ -13,8 +13,6 @@ namespace BurLunch.AuthAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -35,7 +33,6 @@ namespace BurLunch.AuthAPI
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
             }
@@ -46,8 +43,6 @@ namespace BurLunch.AuthAPI
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();

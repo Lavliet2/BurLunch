@@ -14,14 +14,12 @@ public class DishTypesController : ControllerBase
         _context = context;
     }
 
-    // Получить все типы блюд
     [HttpGet]
     public IActionResult GetDishTypes()
     {
         return Ok(_context.DishTypes.ToList());
     }
 
-    // Добавить тип блюда
     [HttpPost]
     public IActionResult AddDishType([FromBody] DishType dishType)
     {
@@ -33,7 +31,6 @@ public class DishTypesController : ControllerBase
         return Ok(dishType);
     }
 
-    // Удалить тип блюда
     [HttpDelete("{id}")]
     public IActionResult DeleteDishType(int id)
     {

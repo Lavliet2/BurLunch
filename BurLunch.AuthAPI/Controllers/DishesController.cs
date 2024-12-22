@@ -88,13 +88,11 @@ public class DishesController : ControllerBase
             return BadRequest(new { Message = "Некорректные данные блюда." });
         }
 
-        // Проверяем, существует ли блюдо с таким именем
         if (_context.Dishes.Any(d => d.Name.ToLower() == dish.Name.ToLower()))
         {
             return Conflict(new { Message = "Блюдо с таким именем уже существует." });
         }
 
-        // Проверяем, существует ли тип блюда
         var dishType = _context.DishTypes.Find(dish.DishTypeId);
         if (dishType == null)
         {
@@ -107,9 +105,6 @@ public class DishesController : ControllerBase
         return CreatedAtAction(nameof(AddDish), new { id = dish.Id }, dish);
     }
 
-
-
-    // Удалить блюдо
     [HttpDelete("{id}")]
     public IActionResult DeleteDish(int id)
     {

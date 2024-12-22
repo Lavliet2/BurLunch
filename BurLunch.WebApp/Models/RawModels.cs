@@ -7,7 +7,7 @@ namespace BurLunch.WebApp.Models
             public string Name { get; set; }
             public string Description { get; set; }
             public int DishTypeId { get; set; }
-            public string DishType { get; set; } // Это строка из JSON
+            public string DishType { get; set; }
         }
         public class RawWeeklyMenu
         {
@@ -49,12 +49,12 @@ namespace BurLunch.WebApp.Models
 
         public class RawSelection
         {
-            public List<int> DishIds { get; set; } // Список ID выбранных блюд
-            public int TableId { get; set; } // ID выбранного стола
-            public int ScheduleId { get; set; } // ID расписания
-            public int UserId { get; set; } // ID пользователя
-            public int SeatsReserved { get; set; } // Количество мест
-            public DateTime Date { get; set; } // Дата выбора
+            public List<int> DishIds { get; set; }
+            public int TableId { get; set; }
+            public int ScheduleId { get; set; }
+            public int UserId { get; set; }
+            public int SeatsReserved { get; set; }
+            public DateTime Date { get; set; }
         }
 
         public class SaveSelectionRequest

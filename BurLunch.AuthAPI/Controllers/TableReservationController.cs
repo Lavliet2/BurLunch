@@ -15,19 +15,6 @@ public class TableReservationController : ControllerBase
         _context = context;
     }
 
-    //// Получить список бронирований
-    //[HttpGet]
-    //public async Task<IActionResult> GetReservations()
-    //{
-    //    var reservations = await _context.TableReservations
-    //        .Include(tr => tr.Table)
-    //        .Include(tr => tr.Schedule)
-    //        .ThenInclude(s => s.WeeklyMenu)
-    //        .Include(tr => tr.User)
-    //        .ToListAsync();
-
-    //    return Ok(reservations);
-    //}
     [HttpGet]
     public async Task<IActionResult> GetReservations()
     {
@@ -35,7 +22,7 @@ public class TableReservationController : ControllerBase
             .Include(tr => tr.Table)
             .Include(tr => tr.Schedule)
             .Include(tr => tr.User)
-            .Include(tr => tr.SelectedDishes) // Загружаем связанные блюда
+            .Include(tr => tr.SelectedDishes) 
             .Select(r => new
             {
                 r.Id,
@@ -63,66 +50,13 @@ public class TableReservationController : ControllerBase
         return Ok(reservations);
     }
 
-    //[HttpGet("reservations/{scheduleId}")]
-    //public async Task<IActionResult> GetReservations(int scheduleId)
-    //{
-    //    var reservations = await _context.TableReservations
-    //        .Include(tr => tr.Table)
-    //        .Include(tr => tr.User)
-    //        .Where(tr => tr.ScheduleId == scheduleId)
-    //        .ToListAsync();
-
-    //    var result = reservations.Select(r => new
-    //    {
-    //        TableId = r.TableId,
-    //        UserName = r.User.Username,
-    //        SeatsReserved = r.SeatsReserved,
-    //        ReservationTime = r.ReservationTime
-    //    });
-
-    //    return Ok(result);
-    //}
-    //[HttpGet("reservations/{scheduleId}")]
-    //public async Task<IActionResult> GetReservations(int scheduleId)
-    //{
-    //    var reservations = await _context.TableReservations
-    //        .Include(tr => tr.Table)
-    //        .Include(tr => tr.User)
-    //        .Include(tr => tr.SelectedDishes) // Включаем связанные блюда
-    //        .Where(tr => tr.ScheduleId == scheduleId)
-    //        .Select(r => new
-    //        {
-    //            r.Id,
-    //            r.ScheduleId,
-    //            r.TableId,
-    //            Table = new
-    //            {
-    //                r.Table.Id,
-    //                r.Table.Seats,
-    //                r.Table.Description
-    //            },
-    //            r.UserId,
-    //            r.SeatsReserved,
-    //            r.ReservationTime,
-    //            SelectedDishes = r.SelectedDishes.Select(d => new
-    //            {
-    //                d.Id,
-    //                d.Name,
-    //                d.Description,
-    //                DishType = d.DishType.Name
-    //            })
-    //        })
-    //        .ToListAsync();
-
-    //    return Ok(reservations);
-    //}
     [HttpGet("reservations/{scheduleId}")]
     public async Task<IActionResult> GetReservations(int scheduleId)
     {
         var reservations = await _context.TableReservations
             .Include(tr => tr.Table)
             .Include(tr => tr.User)
-            .Include(tr => tr.SelectedDishes) // Включаем связанные блюда
+            .Include(tr => tr.SelectedDishes) 
             .Where(tr => tr.ScheduleId == scheduleId)
             .Select(r => new
             {
@@ -136,7 +70,7 @@ public class TableReservationController : ControllerBase
                     r.Table.Description
                 },
                 r.UserId,
-                r.User.Username, // UserName доступен
+                r.User.Username,
                 r.SeatsReserved,
                 r.ReservationTime,
                 SelectedDishes = r.SelectedDishes.Select(d => new
@@ -191,7 +125,7 @@ public class TableReservationController : ControllerBase
             UserId = userId,
             SeatsReserved = seatsReserved,
             ReservationTime = DateTime.UtcNow,
-            SelectedDishes = dishes // Сохраняем выбранные блюда
+            SelectedDishes = dishes 
         };
 
         _context.TableReservations.Add(reservation);
@@ -200,10 +134,6 @@ public class TableReservationController : ControllerBase
         return Ok(new { Message = "Выбор успешно сохранён!" });
     }
 
-
-
-
-    // Удалить бронирование
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteReservation(int id)
     {

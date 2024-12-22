@@ -9,7 +9,6 @@ namespace BurLunch.WebApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Добавление сервисов
             builder.Services.AddControllersWithViews();
             builder.Services.AddHttpClient("BurLunchAPI", client =>
             {
@@ -27,7 +26,7 @@ namespace BurLunch.WebApp
             {
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // Время жизни сессии
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
             });
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -42,7 +41,6 @@ namespace BurLunch.WebApp
 
             var app = builder.Build();
 
-            // Настройка конвейера (middleware)
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -54,7 +52,6 @@ namespace BurLunch.WebApp
 
             app.UseRouting();
 
-            // Добавьте это перед `UseAuthorization`
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();

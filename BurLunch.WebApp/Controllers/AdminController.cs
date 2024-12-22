@@ -95,14 +95,6 @@ public class AdminController : Controller
     {
         return View();
     }
-    //public class RawDish
-    //{
-    //    public int Id { get; set; }
-    //    public string Name { get; set; }
-    //    public string Description { get; set; }
-    //    public int DishTypeId { get; set; }
-    //    public string DishType { get; set; } // Это строка из JSON
-    //}
 
     public async Task<IActionResult> ManageDishes()
     {
@@ -284,18 +276,15 @@ public class AdminController : Controller
         return View(new List<RawWeeklyMenu>());
     }
 
-
     // Добавление новой карточки меню
     [HttpPost]
     public async Task<IActionResult> AddWeeklyMenu(string menuName)
     {
         var client = _httpClientFactory.CreateClient("BurLunchAPI");
 
-        // Формируем JSON-пayload с названием меню
         var payload = new { Name = menuName };
         var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-        // Отправляем POST-запрос в API
         var response = await client.PostAsync("WeeklyMenu", jsonContent);
 
         if (response.IsSuccessStatusCode)
@@ -309,7 +298,6 @@ public class AdminController : Controller
 
         return RedirectToAction("ManageWeeklyMenu");
     }
-
 
     // Удаление карточки меню
     [HttpPost]
@@ -409,7 +397,7 @@ public class AdminController : Controller
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
 
-            return Json(weeklyMenus); // Возвращаем JSON для фронтенда
+            return Json(weeklyMenus);
         }
 
         return StatusCode((int)response.StatusCode, "Ошибка при загрузке меню.");
@@ -443,7 +431,7 @@ public class AdminController : Controller
         {
             var processedSchedules = schedules.Select(schedule => new CreateScheduleRequest
             {
-                Date = DateTime.SpecifyKind(schedule.Date, DateTimeKind.Utc), // Преобразуем дату в UTC
+                Date = DateTime.SpecifyKind(schedule.Date, DateTimeKind.Utc),
                 WeeklyMenuId = schedule.WeeklyMenuId
             }).ToList();
 

@@ -55,7 +55,6 @@ public class AccountController : Controller
 
             if (user != null && !string.IsNullOrEmpty(user.Username) && !string.IsNullOrEmpty(user.Role))
             {
-                // Создаем Claims
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Username),
@@ -66,13 +65,7 @@ public class AccountController : Controller
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
 
-                // Устанавливаем аутентификацию
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                //if (user.Role == "Administrator")
-                //{
-                //    return RedirectToAction("AdminPanel", "Admin");
-                //}
 
                 return RedirectToAction("Menu", "Menu");
             }
