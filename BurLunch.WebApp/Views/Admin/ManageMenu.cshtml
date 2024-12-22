@@ -9,74 +9,40 @@
     <div class="card menu-card">
         <div class="card-body d-flex flex-column align-items-center text-center">
             <h5 class="card-title">Управление блюдами</h5>
-            <p class="card-text">Добавляйте, редактируйте или удаляйте блюда из меню.</p>
+            <p class="card-text">Добавляйте и удаляйте столы для ресторана.</p>
             <a asp-action="ManageDishes" asp-controller="Admin" class="btn btn-primary mt-auto">
                 Управлять блюдами
             </a>
         </div>
     </div>
-
-
     <!-- Блок управления недельным меню -->
     <div class="card menu-card">
         <div class="card-body d-flex flex-column align-items-center text-center">
             <h5 class="card-title">Управление недельным меню</h5>
-            <p class="card-text">Создавайте и управляйте недельными меню.</p>
-            <button class="btn btn-primary mt-auto" data-bs-toggle="modal" data-bs-target="#manageWeeklyMenusModal">Управлять недельным меню</button>
+            <p class="card-text">Создавайте и управляйте бизнес-ланчами.</p>
+            <a asp-action="ManageWeeklyMenu" asp-controller="Admin" class="btn btn-primary mt-auto">
+                Управлять недельным меню
+            </a>
         </div>
     </div>
-
     <!-- Блок управления столами -->
     <div class="card menu-card">
         <div class="card-body d-flex flex-column align-items-center text-center">
             <h5 class="card-title">Управление столами</h5>
-            <p class="card-text">Добавляйте и удаляйте столы для ресторана.</p>
-            <button class="btn btn-primary mt-auto" data-bs-toggle="modal" data-bs-target="#manageTablesModal">Управлять столами</button>
+            <p class="card-text">Добавляйте, редактируйте или удаляйте столы.</p>
+            <a asp-action="ManageTables" asp-controller="Admin" class="btn btn-primary mt-auto">
+                Управлять столами
+            </a>
         </div>
     </div>
-</div>
-
-<!-- Модальное окно для управления блюдами -->
-<div class="modal fade" id="manageDishesModal" tabindex="-1" aria-labelledby="manageDishesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="manageDishesModalLabel" style="color: #CE0E2D;">Управление блюдами</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @Html.Partial("_ManageDishesPartial")
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Модальное окно для управления недельным меню -->
-<div class="modal fade" id="manageWeeklyMenusModal" tabindex="-1" aria-labelledby="manageWeeklyMenusModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="manageWeeklyMenusModalLabel" style="color: #CE0E2D;">Управление недельным меню</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @Html.Partial("_ManageWeeklyMenusPartial")
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Модальное окно для управления столами -->
-<div class="modal fade" id="manageTablesModal" tabindex="-1" aria-labelledby="manageTablesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="manageTablesModalLabel" style="color: #CE0E2D;">Управление столами</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @Html.Partial("_ManageTablesPartial")
-            </div>
+    <!-- Новый блок: Управление расписанием бизнес-ланчей -->
+    <div class="card menu-card">
+        <div class="card-body d-flex flex-column align-items-center text-center">
+            <h5 class="card-title">Управление расписанием</h5>
+            <p class="card-text">Составляйте расписание бизнес-ланчей.</p>
+            <a asp-action="ManageSchedule" asp-controller="Admin" class="btn btn-primary mt-auto">
+                Управлять расписанием
+            </a>
         </div>
     </div>
 </div>
@@ -93,22 +59,21 @@
         justify-content: space-between;
     }
 
-        .menu-card .card-body {
-            height: 100%;
-        }
+    .menu-card .card-body {
+        height: 100%;
+    }
 
-        .menu-card h5 {
-            color: #CE0E2D;
-        }
+    .menu-card h5 {
+        color: #CE0E2D;
+    }
 
     .btn-primary {
         background-color: #CE0E2D;
         border-color: #CE0E2D;
     }
 
-        .btn-primary:hover {
-            background-color: #A10D20;
-            border-color: #A10D20;
-        }
+    .btn-primary:hover {
+        background-color: #A10D20;
+        border-color: #A10D20;
+    }
 </style>
-

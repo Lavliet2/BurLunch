@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using BurLunch.WebApp.Models;
 
 [Authorize(Roles = "Administrator")]
 public class AdminController : Controller
@@ -88,20 +89,13 @@ public class AdminController : Controller
         return RedirectToAction("ManageUsers");
     }
     /*****************************************************************************************/
-    /***** Управление меню*****/
-    public class RawDish
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public int DishTypeId { get; set; }
-        public string DishType { get; set; } // Это строка из JSON
-    }
-
+                                /***** Управление меню*****/
+    /***** Управление блюдами*****/
     public IActionResult ManageMenu()
     {
         return View();
     }
+
     public async Task<IActionResult> ManageDishes()
     {
         var client = _httpClientFactory.CreateClient("BurLunchAPI");
@@ -200,179 +194,309 @@ public class AdminController : Controller
 
         return RedirectToAction("ManageDishes");
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //public async Task<IActionResult> GetDishes()
-    //{
-    //    var client = _httpClientFactory.CreateClient("BurLunchAPI");
-
-    //    // Запрос списка блюд
-    //    var responseDishes = await client.GetAsync("Dishes");
-    //    var responseDishTypes = await client.GetAsync("DishTypes");
-
-    //    if (responseDishes.IsSuccessStatusCode && responseDishTypes.IsSuccessStatusCode)
-    //    {
-    //        var rawDishes = JsonSerializer.Deserialize<List<RawDish>>(
-    //            await responseDishes.Content.ReadAsStringAsync(),
-    //            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-    //        );
-
-    //        var dishTypes = JsonSerializer.Deserialize<List<DishType>>(
-    //            await responseDishTypes.Content.ReadAsStringAsync(),
-    //            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-    //        );
-
-    //        ViewBag.DishTypes = dishTypes;
-
-    //        var dishes = rawDishes.Select(rd => new Dish
-    //        {
-    //            Id = rd.Id,
-    //            Name = rd.Name,
-    //            Description = rd.Description,
-    //            DishTypeId = rd.DishTypeId,
-    //            DishType = new DishType { Name = rd.DishType }
-    //        }).ToList();
-
-    //        return PartialView("_ManageDishesPartial", dishes);
-    //    }
-
-    //    ModelState.AddModelError("", "Не удалось загрузить данные.");
-    //    return PartialView("_ManageDishesPartial", new List<Dish>());
-    //}
-
-    //[HttpPost]
-    //public async Task<IActionResult> AddDish([FromBody] Dish dish)
-    //{
-    //    if (dish == null || string.IsNullOrEmpty(dish.Name) || dish.DishTypeId <= 0)
-    //    {
-    //        return BadRequest("Название блюда и тип блюда обязательны.");
-    //    }
-
-    //    var client = _httpClientFactory.CreateClient("BurLunchAPI");
-    //    var jsonContent = new StringContent(JsonSerializer.Serialize(dish), Encoding.UTF8, "application/json");
-    //    var response = await client.PostAsync("Dishes", jsonContent);
-
-    //    if (response.IsSuccessStatusCode)
-    //    {
-    //        return Ok();
-    //    }
-    //    else
-    //    {
-    //        return StatusCode((int)response.StatusCode, "Не удалось добавить блюдо.");
-    //    }
-    //}
-    //[HttpPost]
-    //public async Task<IActionResult> AddDish([FromBody] Dish dish)
-    //{
-    //    if (dish == null || string.IsNullOrEmpty(dish.Name) || dish.DishTypeId <= 0)
-    //    {
-    //        return BadRequest("Название блюда и тип блюда обязательны.");
-    //    }
-
-    //    var client = _httpClientFactory.CreateClient("BurLunchAPI");
-
-    //    // Создаём объект для отправки в API
-    //    var payload = new
-    //    {
-    //        name = dish.Name,
-    //        description = dish.Description,
-    //        dishTypeId = dish.DishTypeId
-    //    };
-
-    //    var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-
-    //    // Отправляем данные в API
-    //    var response = await client.PostAsync("Dishes", jsonContent);
-
-    //    if (response.IsSuccessStatusCode)
-    //    {
-    //        return Ok();
-    //    }
-    //    else
-    //    {
-    //        return StatusCode((int)response.StatusCode, "Не удалось добавить блюдо.");
-    //    }
-    //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //public async Task<IActionResult> GetWeeklyMenus()
-    //{
-    //    var client = _httpClientFactory.CreateClient("BurLunchAPI");
-    //    var response = await client.GetAsync("WeeklyMenu");
-
-    //    if (response.IsSuccessStatusCode)
-    //    {
-    //        var weeklyMenus = JsonSerializer.Deserialize<List<WeeklyMenuCard>>(
-    //            await response.Content.ReadAsStringAsync(),
-    //            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-    //        );
-
-    //        return PartialView("_ManageWeeklyMenusPartial", weeklyMenus);
-    //    }
-
-    //    ModelState.AddModelError("", "Не удалось загрузить недельные меню.");
-    //    return PartialView("_ManageWeeklyMenusPartial", new List<WeeklyMenuCard>());
-    //}
-
-    //public async Task<IActionResult> GetTables()
-    //{
-    //    var client = _httpClientFactory.CreateClient("BurLunchAPI");
-    //    var response = await client.GetAsync("Tables");
-
-    //    if (response.IsSuccessStatusCode)
-    //    {
-    //        var tables = JsonSerializer.Deserialize<List<Table>>(
-    //            await response.Content.ReadAsStringAsync(),
-    //            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-    //        );
-
-    //        return PartialView("_ManageTablesPartial", tables);
-    //    }
-
-    //    ModelState.AddModelError("", "Не удалось загрузить список столов.");
-    //    return PartialView("_ManageTablesPartial", new List<Table>());
-    //}
-
+    /*****************************************************************************************/
+    /***** Управление столами*****/
+    [HttpGet]
+    public async Task<IActionResult> ManageTables()
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync("Tables");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var tables = JsonSerializer.Deserialize<List<Table>>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return View(tables);
+        }
+
+        ModelState.AddModelError("", "Не удалось загрузить список столов.");
+        return View(new List<Table>());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddTable([FromBody] Table table)
+    {
+        if (table == null || table.Id <= 0 || table.Seats <= 0)
+        {
+            return BadRequest("Номер стола и количество мест обязательны для заполнения.");
+        }
+
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var jsonContent = new StringContent(JsonSerializer.Serialize(table), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("Tables", jsonContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return Ok(new { message = "Стол успешно добавлен." });
+        }
+
+        return StatusCode((int)response.StatusCode, "Не удалось добавить стол.");
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteTable(int id)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.DeleteAsync($"Tables/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["Message"] = "Стол успешно удалён.";
+        }
+        else
+        {
+            TempData["Error"] = "Не удалось удалить стол.";
+        }
+
+        return RedirectToAction("ManageTables");
+    }
+    /*****************************************************************************************/
+    /***** Управление недельным меню*****/
+    public async Task<IActionResult> ManageWeeklyMenu()
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync("WeeklyMenu");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var weeklyMenus = JsonSerializer.Deserialize<List<RawWeeklyMenu>>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return View(weeklyMenus);
+        }
+
+        ModelState.AddModelError("", "Не удалось загрузить недельное меню.");
+        return View(new List<RawWeeklyMenu>());
+    }
+
+    // Добавление новой карточки меню
+    [HttpPost]
+    public async Task<IActionResult> AddWeeklyMenu(string menuName)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+
+        var payload = new { Name = menuName };
+        var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("WeeklyMenu", jsonContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["Message"] = "Новая карточка бизнес-ланча успешно создана.";
+        }
+        else
+        {
+            TempData["Error"] = "Не удалось создать карточку бизнес-ланча.";
+        }
+
+        return RedirectToAction("ManageWeeklyMenu");
+    }
+
+    // Удаление карточки меню
+    [HttpPost]
+    public async Task<IActionResult> DeleteWeeklyMenu(int id)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.DeleteAsync($"WeeklyMenu/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["Message"] = "Карточка меню успешно удалена.";
+        }
+        else
+        {
+            TempData["Error"] = "Не удалось удалить карточку меню.";
+        }
+
+        return RedirectToAction("ManageWeeklyMenu");
+    }
+
+    // Добавление блюда в карточку меню
+    [HttpPost]
+    public async Task<IActionResult> AddDishToWeeklyMenu(int weeklyMenuId, int dishId)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var payload = new { dishId };
+        var jsonContent = new StringContent(dishId.ToString(), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync($"WeeklyMenu/{weeklyMenuId}/add-dish", jsonContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["Message"] = "Блюдо успешно добавлено в меню.";
+        }
+        else
+        {
+            TempData["Error"] = "Не удалось добавить блюдо.";
+        }
+
+        return RedirectToAction("ManageWeeklyMenu");
+    }
+
+    // Удаление блюда из карточки меню
+    [HttpPost]
+    public async Task<IActionResult> RemoveDishFromWeeklyMenu(int weeklyMenuId, int dishId)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.DeleteAsync($"WeeklyMenu/{weeklyMenuId}/remove-dish/{dishId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["Message"] = "Блюдо успешно удалено из меню.";
+        }
+        else
+        {
+            TempData["Error"] = "Не удалось удалить блюдо.";
+        }
+
+        return RedirectToAction("ManageWeeklyMenu");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAvailableDishes(int weeklyMenuId)
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync($"WeeklyMenu/{weeklyMenuId}/available-dishes");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var availableDishes = JsonSerializer.Deserialize<List<RawDish>>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+            ViewBag.WeeklyMenuId = weeklyMenuId;
+            return PartialView("_AvailableDishesPartial", availableDishes);
+        }
+
+        return Content("Ошибка при загрузке блюд");
+    }
+    /*****************************************************************************************/
+    /***** Управление рассписанием*****/
+    public IActionResult ManageSchedule()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetWeeklyMenus()
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync("WeeklyMenu");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var weeklyMenus = JsonSerializer.Deserialize<List<RawWeeklyMenu>>(
+                await response.Content.ReadAsStringAsync(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return Json(weeklyMenus);
+        }
+
+        return StatusCode((int)response.StatusCode, "Ошибка при загрузке меню.");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetSchedules()
+    {
+        var client = _httpClientFactory.CreateClient("BurLunchAPI");
+        var response = await client.GetAsync("Schedule");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return StatusCode((int)response.StatusCode, "Ошибка при загрузке расписания.");
+        }
+
+        var schedules = await response.Content.ReadAsStringAsync();
+        return Content(schedules, "application/json");
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> CreateSchedules([FromBody] List<CreateScheduleRequest> schedules)
+    {
+        if (schedules == null || schedules.Count == 0)
+        {
+            return BadRequest("Данные для создания расписания отсутствуют.");
+        }
+
+        try
+        {
+            var processedSchedules = schedules.Select(schedule => new CreateScheduleRequest
+            {
+                Date = DateTime.SpecifyKind(schedule.Date, DateTimeKind.Utc),
+                WeeklyMenuId = schedule.WeeklyMenuId
+            }).ToList();
+
+            var json = JsonSerializer.Serialize(processedSchedules, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            Console.WriteLine($"Отправляем JSON: {json}");
+
+            var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var client = _httpClientFactory.CreateClient("BurLunchAPI");
+            var response = await client.PostAsync("Schedule/BulkCreate", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok(new { Message = "Расписания успешно созданы." });
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                return StatusCode((int)response.StatusCode, $"Ошибка при создании расписания: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Произошла ошибка: {ex.Message}");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteSchedules([FromBody] List<DateTime> dates)
+    {
+        if (dates == null || dates.Count == 0)
+        {
+            return BadRequest("Даты для удаления отсутствуют.");
+        }
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient("BurLunchAPI");
+            var jsonContent = new StringContent(
+                JsonSerializer.Serialize(dates, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await client.PostAsync("Schedule/BulkDelete", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok(new { Message = "Расписания успешно удалены." });
+            }
+
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            return StatusCode((int)response.StatusCode, $"Ошибка при удалении расписания: {errorMessage}");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Произошла ошибка: {ex.Message}");
+        }
+    }
 
 }

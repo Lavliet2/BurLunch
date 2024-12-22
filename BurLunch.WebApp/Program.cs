@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using BurLunch.AuthAPI.Utils;
 
 namespace BurLunch.WebApp
 {
@@ -8,19 +9,24 @@ namespace BurLunch.WebApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Добавление сервисов
             builder.Services.AddControllersWithViews();
             builder.Services.AddHttpClient("BurLunchAPI", client =>
             {
                 var baseUrl = builder.Configuration["ApiSettings:BaseUrl"];
                 client.BaseAddress = new Uri(baseUrl);
             });
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+                });
+
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // Время жизни сессии
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
             });
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -35,7 +41,6 @@ namespace BurLunch.WebApp
 
             var app = builder.Build();
 
-            // Настройка конвейера (middleware)
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -47,7 +52,6 @@ namespace BurLunch.WebApp
 
             app.UseRouting();
 
-            // Добавьте это перед `UseAuthorization`
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();

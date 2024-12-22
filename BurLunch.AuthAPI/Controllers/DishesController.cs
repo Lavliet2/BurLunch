@@ -31,7 +31,8 @@ public class DishesController : ControllerBase
         return Ok(dishes);
     }
 
-    [HttpGet]
+    //[HttpGet]
+    [HttpGet("filter")]
     public IActionResult GetDishes([FromQuery] int? dishTypeId)
     {
         var query = _context.Dishes.AsQueryable();
@@ -55,6 +56,28 @@ public class DishesController : ControllerBase
         return Ok(dishes);
     }
 
+    [HttpPost("findByIds")]
+    public IActionResult GetDishesByIds([FromBody] List<int> dishIds)
+    {
+        if (dishIds == null || !dishIds.Any())
+        {
+            return BadRequest(new { Message = "Список идентификаторов блюд пуст или отсутствует." });
+        }
+
+        var dishes = _context.Dishes
+            .Include(d => d.DishType)
+            .Where(d => dishIds.Contains(d.Id))
+            .Select(d => new
+            {
+                d.Id,
+                d.Name,
+                d.Description,
+                DishType = d.DishType != null ? d.DishType.Name : null
+            })
+            .ToList();
+
+        return Ok(dishes);
+    }
 
 
     [HttpPost]
@@ -65,13 +88,11 @@ public class DishesController : ControllerBase
             return BadRequest(new { Message = "Некорректные данные блюда." });
         }
 
-        // Проверяем, существует ли блюдо с таким именем
         if (_context.Dishes.Any(d => d.Name.ToLower() == dish.Name.ToLower()))
         {
             return Conflict(new { Message = "Блюдо с таким именем уже существует." });
         }
 
-        // Проверяем, существует ли тип блюда
         var dishType = _context.DishTypes.Find(dish.DishTypeId);
         if (dishType == null)
         {
@@ -84,9 +105,6 @@ public class DishesController : ControllerBase
         return CreatedAtAction(nameof(AddDish), new { id = dish.Id }, dish);
     }
 
-
-
-    // Удалить блюдо
     [HttpDelete("{id}")]
     public IActionResult DeleteDish(int id)
     {
