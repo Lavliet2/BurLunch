@@ -1,92 +1,9 @@
 ﻿@model BurLunch.WebApp.Models.MenuWithTablesViewModel
 
-<h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Меню на @ViewBag.Date.ToString("dd.MM.yyyy")</h2>
-
 <div class="row">
-    <!-- Секция меню -->
-    <div class="col-lg-12">
-        @if (Model.Menu == null || !Model.Menu.Dishes.Any())
-        {
-            <div class="alert alert-warning text-center" role="alert">
-                На эту дату нет доступных блюд.
-            </div>
-        }
-        else
-        {
-            <div class="d-flex flex-wrap gap-4 justify-content-start">
-                @foreach (var dishType in Model.Menu.Dishes.GroupBy(d => d.DishType))
-                {
-                    <div class="card shadow-sm" style="width: 18rem; flex: 0 0 auto;">
-                        <div class="card-header bg-danger text-white text-center">
-                            <h5 class="mb-0">@dishType.Key</h5>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                @foreach (var dish in dishType)
-                                {
-                                    <li class="mb-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input dish-checkbox" type="checkbox"
-                                                   name="selectedDishes"
-                                                   id="dish-@dish.Id"
-                                                   value="@dish.Id" />
-                                            <label class="form-check-label" for="dish-@dish.Id">
-                                                <strong>@dish.Name</strong>
-                                                <div class="text-muted fst-italic" style="font-size: 0.9rem;">@dish.Description</div>
-                                            </label>
-                                        </div>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-                }
-                <!-- Секция доступных столов -->
-                    @if (Model.Tables == null || !Model.Tables.Any())
-                    {
-                        <div class="alert alert-warning text-center" role="alert">
-                            На эту дату нет доступных столов.
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="d-flex flex-wrap gap-4 justify-content-start">
-                            <div class="card-header bg-danger text-white text-center">
-                                <h5 class="mb-0">Доступные столы</h5>
-                            </div>
-                            <ul class="list-group w-100">
-                                @foreach (var table in Model.Tables)
-                                {
-                                    <li class="list-group-item">
-                                        <div class="form-check">
-                                            <input class="form-check-input table-radio" type="radio"
-                                                   name="selectedTable"
-                                                   id="table-@table.Id"
-                                                   value="@table.Id" />
-                                            <label class="form-check-label" for="table-@table.Id">
-                                                <strong>Стол №@table.Id</strong>
-                                            </label>
-                                        </div>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    }
-            </div>
-        }
-    </div>
-
-
-    <!-- Кнопка сохранения выбора -->
-    <div class="col-lg-12 mt-4 text-center">
-        <button type="button" id="submitSelectionBtn" class="btn btn-danger">
-            Сохранить выбор
-        </button>
-    </div>
-
     <!-- Секция текущих бронирований -->
     <div class="col-lg-12 mt-5">
-        <h4 class="text-danger">Список бронирований</h4>
+        <h4 class="text-danger mb-4">Список бронирований</h4>
         <div id="reservationsList" class="list-group">
             @if (Model.Reservations == null || !Model.Reservations.Any())
             {
@@ -96,21 +13,101 @@
             {
                 @foreach (var reservation in Model.Reservations)
                 {
-                    <div class="list-group-item">
-                        <strong>Стол №@reservation.Table.Id</strong> — @reservation.SeatsReserved мест<br>
-                        Забронировано пользователем: @reservation.Id<br>
-                        Время: @reservation.ReservationTime<br>
+                    <div class="list-group-item p-3 shadow-sm rounded mb-2" style="border: 1px solid #CE0E2D;">
+                        <h5><strong>Стол №@reservation.Table.Id</strong> — @reservation.SeatsReserved мест</h5>
+                        <p class="mb-1">Забронировано пользователем: <span class="text-danger">@reservation.Id</span></p>
+                        <p class="mb-1">Время: <span class="text-muted">@reservation.ReservationTime</span></p>
                         <strong>Выбранные блюда:</strong>
-                        <ul>
+                        <ul class="mt-2">
                             @foreach (var dish in reservation.SelectedDishes)
                             {
-                                <li>@dish.Name - @dish.Description</li>
+                                <li>@dish.Name — <span class="text-muted">@dish.Description</span></li>
                             }
                         </ul>
                     </div>
                 }
             }
         </div>
+    </div>
+
+    <!-- Секция меню и доступных столов -->
+    <div class="col-lg-12 mt-5">
+        <h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Меню на @ViewBag.Date.ToString("dd.MM.yyyy")</h2>
+        @if (Model.Menu == null || !Model.Menu.Dishes.Any())
+        {
+            <div class="alert alert-warning text-center" role="alert">
+                На эту дату нет доступных блюд.
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <!-- Меню -->
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap gap-4 justify-content-start">
+                        @foreach (var dishType in Model.Menu.Dishes.GroupBy(d => d.DishType))
+                        {
+                            <div class="card shadow-sm" style="width: 18rem; flex: 0 0 auto;">
+                                <div class="card-header bg-danger text-white text-center">
+                                    <h5 class="mb-0">@dishType.Key</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        @foreach (var dish in dishType)
+                                        {
+                                            <li class="mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input dish-radio" type="radio"
+                                                           name="selectedDish"
+                                                           id="dish-@dish.Id"
+                                                           value="@dish.Id" />
+                                                    <label class="form-check-label" for="dish-@dish.Id">
+                                                        <strong>@dish.Name</strong>
+                                                        <div class="text-muted fst-italic" style="font-size: 0.9rem;">@dish.Description</div>
+                                                    </label>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Доступные столы -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-danger text-white text-center">
+                            <h5 class="mb-0">Доступные столы</h5>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var table in Model.Tables)
+                            {
+                                <li class="list-group-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input table-radio" type="radio"
+                                               name="selectedTable"
+                                               id="table-@table.Id"
+                                               value="@table.Id" />
+                                        <label class="form-check-label" for="table-@table.Id">
+                                            <strong>Стол №@table.Id</strong> — @table.Seats мест
+                                        </label>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Кнопка сохранения выбора -->
+    <div class="col-lg-12 mt-4 text-center">
+        <button type="button" id="submitSelectionBtn" class="btn btn-danger">
+            Сохранить выбор
+        </button>
     </div>
 </div>
 
@@ -134,15 +131,16 @@
 
                     reservations.forEach(reservation => {
                         const item = document.createElement("div");
-                        item.classList.add("list-group-item");
+                        item.classList.add("list-group-item", "p-3", "shadow-sm", "rounded", "mb-2");
+                        item.style.border = "1px solid #CE0E2D";
 
                         item.innerHTML = `
-                            <strong>Стол №${reservation.Table.Id}</strong> — ${reservation.SeatsReserved} мест<br>
-                            Забронировано пользователем: ${reservation.UserName}<br>
-                            Время: ${new Date(reservation.ReservationTime).toLocaleString()}<br>
+                            <h5><strong>Стол №${reservation.Table.Id}</strong> — ${reservation.SeatsReserved} мест</h5>
+                            <p class="mb-1">Забронировано пользователем: <span class="text-danger">${reservation.UserName}</span></p>
+                            <p class="mb-1">Время: <span class="text-muted">${new Date(reservation.ReservationTime).toLocaleString()}</span></p>
                             <strong>Выбранные блюда:</strong>
-                            <ul>
-                                ${reservation.SelectedDishes.map(dish => `<li>${dish.Name} - ${dish.Description}</li>`).join('')}
+                            <ul class="mt-2">
+                                ${reservation.SelectedDishes.map(dish => `<li>${dish.Name} — <span class="text-muted">${dish.Description}</span></li>`).join('')}
                             </ul>
                         `;
 
@@ -157,21 +155,18 @@
 
         // Обработка сохранения выбора
         submitSelectionBtn.addEventListener("click", function () {
-            const selectedDishes = Array.from(document.querySelectorAll(".dish-checkbox:checked"))
-                .map(checkbox => parseInt(checkbox.value, 10));
-
+            const selectedDish = document.querySelector(".dish-radio:checked");
             const selectedTable = document.querySelector(".table-radio:checked");
-            const tableId = selectedTable ? parseInt(selectedTable.value, 10) : 0;
 
-            if (tableId === 0 || selectedDishes.length === 0) {
-                alert("Пожалуйста, выберите стол и хотя бы одно блюдо.");
+            if (!selectedDish || !selectedTable) {
+                alert("Пожалуйста, выберите стол и блюдо.");
                 return;
             }
 
             const payload = {
                 scheduleId: scheduleId,
-                tableId: tableId,
-                dishIds: selectedDishes,
+                tableId: parseInt(selectedTable.value, 10),
+                dishIds: [parseInt(selectedDish.value, 10)],
                 seatsReserved: 1
             };
 
