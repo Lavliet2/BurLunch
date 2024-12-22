@@ -19,6 +19,18 @@ public class TablesController : ControllerBase
         return Ok(_context.Tables.ToList());
     }
 
+    [HttpGet("{id}")]
+    public IActionResult GetTableById(int id)
+    {
+        var table = _context.Tables.Find(id);
+
+        if (table == null)
+            return NotFound($"Стол с ID {id} не найден.");
+
+        return Ok(table);
+    }
+
+
     [HttpPost]
     public IActionResult AddTable([FromBody] Table table)
     {

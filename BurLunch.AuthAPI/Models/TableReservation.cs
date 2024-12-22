@@ -1,17 +1,8 @@
 ﻿namespace BurLunch.AuthAPI.Models
 {
-    //public class TableReservation
-    //{
-    //    public int Id { get; set; } // ID записи брони
-    //    public int TableId { get; set; } // ID стола
-    //    public Table Table { get; set; } // Связь с таблицей столов
-
-    //    public int UserId { get; set; } // ID пользователя
-    //    public User User { get; set; } // Связь с моделью пользователя
-    //}
     public class TableReservation
     {
-        public int Id { get; set; }
+        public int Id { get; set; } // ID записи брони.
 
         public int ScheduleId { get; set; }
         public Schedule Schedule { get; set; } // Связь с расписанием.
@@ -25,5 +16,7 @@
         public int SeatsReserved { get; set; } // Количество забронированных мест.
 
         public DateTime ReservationTime { get; set; } // Время бронирования.
+
+        public ICollection<Dish> SelectedDishes { get; set; } = new List<Dish>(); // Список выбранных блюд.
     }
 }

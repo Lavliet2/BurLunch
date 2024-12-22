@@ -20,6 +20,8 @@ namespace BurLunch.AuthAPI
                 {
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.Converters.Add(new FlexibleDateTimeConverter());
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
                     //options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
                 });
             builder.Services.AddScoped<AuthenticationService>();

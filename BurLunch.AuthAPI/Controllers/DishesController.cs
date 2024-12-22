@@ -56,6 +56,28 @@ public class DishesController : ControllerBase
         return Ok(dishes);
     }
 
+    [HttpPost("findByIds")]
+    public IActionResult GetDishesByIds([FromBody] List<int> dishIds)
+    {
+        if (dishIds == null || !dishIds.Any())
+        {
+            return BadRequest(new { Message = "Список идентификаторов блюд пуст или отсутствует." });
+        }
+
+        var dishes = _context.Dishes
+            .Include(d => d.DishType)
+            .Where(d => dishIds.Contains(d.Id))
+            .Select(d => new
+            {
+                d.Id,
+                d.Name,
+                d.Description,
+                DishType = d.DishType != null ? d.DishType.Name : null
+            })
+            .ToList();
+
+        return Ok(dishes);
+    }
 
 
     [HttpPost]

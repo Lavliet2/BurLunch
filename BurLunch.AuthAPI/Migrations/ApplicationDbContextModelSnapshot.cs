@@ -41,9 +41,14 @@ namespace BurLunch.AuthAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("TableReservationId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DishTypeId");
+
+                    b.HasIndex("TableReservationId");
 
                     b.ToTable("Dishes");
 
@@ -323,6 +328,10 @@ namespace BurLunch.AuthAPI.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("BurLunch.AuthAPI.Models.TableReservation", null)
+                        .WithMany("SelectedDishes")
+                        .HasForeignKey("TableReservationId");
+
                     b.Navigation("DishType");
                 });
 
@@ -387,6 +396,11 @@ namespace BurLunch.AuthAPI.Migrations
             modelBuilder.Entity("BurLunch.AuthAPI.Models.Schedule", b =>
                 {
                     b.Navigation("TableReservations");
+                });
+
+            modelBuilder.Entity("BurLunch.AuthAPI.Models.TableReservation", b =>
+                {
+                    b.Navigation("SelectedDishes");
                 });
 #pragma warning restore 612, 618
         }

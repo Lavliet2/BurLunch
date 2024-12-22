@@ -1,29 +1,196 @@
-﻿@using BurLunch.AuthAPI.Models
-@model WeeklyMenuCard
+﻿@model BurLunch.WebApp.Models.MenuWithTablesViewModel
 
-<h2 class="text-center mt-3">Меню на @ViewBag.Date.ToString("dd.MM.yyyy")</h2>
+<h2 class="text-uppercase mb-4" style="color: #CE0E2D; font-weight: bold;">Меню на @ViewBag.Date.ToString("dd.MM.yyyy")</h2>
 
-<div class="card mt-4">
-    <div class="card-header" style="background-color: #CE0E2D; color: white;">
-        <h4>@Model.Name</h4>
-    </div>
-    <div class="card-body">
-        @if (Model.Dishes.Any())
+<div class="row">
+    <!-- Секция меню -->
+    <div class="col-lg-12">
+        @if (Model.Menu == null || !Model.Menu.Dishes.Any())
         {
-            <ul class="list-group">
-                @foreach (var dish in Model.Dishes)
-                {
-                    <li class="list-group-item">
-                        <h5>@dish.Name</h5>
-                        <p class="text-muted">@dish.DishType?.Name</p>
-                        <p>@dish.Description</p>
-                    </li>
-                }
-            </ul>
+            <div class="alert alert-warning text-center" role="alert">
+                На эту дату нет доступных блюд.
+            </div>
         }
         else
         {
-            <p class="text-muted">Блюда не добавлены.</p>
+            <div class="d-flex flex-wrap gap-4 justify-content-start">
+                @foreach (var dishType in Model.Menu.Dishes.GroupBy(d => d.DishType))
+                {
+                    <div class="card shadow-sm" style="width: 18rem; flex: 0 0 auto;">
+                        <div class="card-header bg-danger text-white text-center">
+                            <h5 class="mb-0">@dishType.Key</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                @foreach (var dish in dishType)
+                                {
+                                    <li class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input dish-checkbox" type="checkbox"
+                                                   name="selectedDishes"
+                                                   id="dish-@dish.Id"
+                                                   value="@dish.Id" />
+                                            <label class="form-check-label" for="dish-@dish.Id">
+                                                <strong>@dish.Name</strong>
+                                                <div class="text-muted fst-italic" style="font-size: 0.9rem;">@dish.Description</div>
+                                            </label>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+                <!-- Секция доступных столов -->
+                    @if (Model.Tables == null || !Model.Tables.Any())
+                    {
+                        <div class="alert alert-warning text-center" role="alert">
+                            На эту дату нет доступных столов.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-wrap gap-4 justify-content-start">
+                            <div class="card-header bg-danger text-white text-center">
+                                <h5 class="mb-0">Доступные столы</h5>
+                            </div>
+                            <ul class="list-group w-100">
+                                @foreach (var table in Model.Tables)
+                                {
+                                    <li class="list-group-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input table-radio" type="radio"
+                                                   name="selectedTable"
+                                                   id="table-@table.Id"
+                                                   value="@table.Id" />
+                                            <label class="form-check-label" for="table-@table.Id">
+                                                <strong>Стол №@table.Id</strong>
+                                            </label>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+            </div>
         }
     </div>
+
+
+    <!-- Кнопка сохранения выбора -->
+    <div class="col-lg-12 mt-4 text-center">
+        <button type="button" id="submitSelectionBtn" class="btn btn-danger">
+            Сохранить выбор
+        </button>
+    </div>
+
+    <!-- Секция текущих бронирований -->
+    <div class="col-lg-12 mt-5">
+        <h4 class="text-danger">Список бронирований</h4>
+        <div id="reservationsList" class="list-group">
+            @if (Model.Reservations == null || !Model.Reservations.Any())
+            {
+                <div class="alert alert-warning text-center">Бронирований пока нет.</div>
+            }
+            else
+            {
+                @foreach (var reservation in Model.Reservations)
+                {
+                    <div class="list-group-item">
+                        <strong>Стол №@reservation.Table.Id</strong> — @reservation.SeatsReserved мест<br>
+                        Забронировано пользователем: @reservation.Id<br>
+                        Время: @reservation.ReservationTime<br>
+                        <strong>Выбранные блюда:</strong>
+                        <ul>
+                            @foreach (var dish in reservation.SelectedDishes)
+                            {
+                                <li>@dish.Name - @dish.Description</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            }
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const submitSelectionBtn = document.getElementById("submitSelectionBtn");
+        const scheduleId = parseInt("@Model.ScheduleId", 10);
+
+        // Функция загрузки списка бронирований
+        function fetchAndDisplayReservations(scheduleId) {
+            fetch(`/api/TableReservation/reservations/${scheduleId}`)
+                .then(response => response.json())
+                .then(reservations => {
+                    const reservationsList = document.getElementById("reservationsList");
+                    reservationsList.innerHTML = ""; // Очищаем список перед обновлением
+
+                    if (reservations.length === 0) {
+                        reservationsList.innerHTML = "<div class='alert alert-warning text-center'>Бронирований пока нет.</div>";
+                        return;
+                    }
+
+                    reservations.forEach(reservation => {
+                        const item = document.createElement("div");
+                        item.classList.add("list-group-item");
+
+                        item.innerHTML = `
+                            <strong>Стол №${reservation.Table.Id}</strong> — ${reservation.SeatsReserved} мест<br>
+                            Забронировано пользователем: ${reservation.UserName}<br>
+                            Время: ${new Date(reservation.ReservationTime).toLocaleString()}<br>
+                            <strong>Выбранные блюда:</strong>
+                            <ul>
+                                ${reservation.SelectedDishes.map(dish => `<li>${dish.Name} - ${dish.Description}</li>`).join('')}
+                            </ul>
+                        `;
+
+                        reservationsList.appendChild(item);
+                    });
+                })
+                .catch(error => console.error("Ошибка при загрузке бронирований:", error));
+        }
+
+        // Загрузка списка бронирований при загрузке страницы
+        fetchAndDisplayReservations(scheduleId);
+
+        // Обработка сохранения выбора
+        submitSelectionBtn.addEventListener("click", function () {
+            const selectedDishes = Array.from(document.querySelectorAll(".dish-checkbox:checked"))
+                .map(checkbox => parseInt(checkbox.value, 10));
+
+            const selectedTable = document.querySelector(".table-radio:checked");
+            const tableId = selectedTable ? parseInt(selectedTable.value, 10) : 0;
+
+            if (tableId === 0 || selectedDishes.length === 0) {
+                alert("Пожалуйста, выберите стол и хотя бы одно блюдо.");
+                return;
+            }
+
+            const payload = {
+                scheduleId: scheduleId,
+                tableId: tableId,
+                dishIds: selectedDishes,
+                seatsReserved: 1
+            };
+
+            console.log("Отправляемые данные:", payload);
+
+            fetch('/Menu/SaveSelection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Выбор успешно сохранён!");
+                    fetchAndDisplayReservations(scheduleId);
+                } else {
+                    response.text().then(text => alert(`Ошибка: ${text}`));
+                }
+            })
+            .catch(error => console.error("Ошибка при отправке данных:", error));
+        });
+    });
+</script>

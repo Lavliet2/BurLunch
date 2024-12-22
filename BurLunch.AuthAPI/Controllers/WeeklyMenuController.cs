@@ -48,6 +48,33 @@ public class WeeklyMenuController : ControllerBase
         return Ok(menus);
     }
 
+    [HttpGet("{id}")]
+    public IActionResult GetWeeklyMenuById(int id)
+    {
+        var weeklyMenu = _context.WeeklyMenuCards
+            .Include(w => w.Dishes)
+            .ThenInclude(d => d.DishType)
+            .FirstOrDefault(w => w.Id == id);
+
+        if (weeklyMenu == null)
+            return NotFound("Карточка меню не найдена.");
+
+        var result = new
+        {
+            weeklyMenu.Id,
+            weeklyMenu.Name,
+            Dishes = weeklyMenu.Dishes.Select(d => new
+            {
+                d.Id,
+                d.Name,
+                d.Description,
+                DishType = d.DishType != null ? d.DishType.Name : null
+            })
+        };
+
+        return Ok(result);
+    }
+
     [HttpGet("{weeklyMenuId}/available-dishes")]
     public IActionResult GetAvailableDishes(int weeklyMenuId)
     {
