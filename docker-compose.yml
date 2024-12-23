@@ -27,5 +27,17 @@ services:
       - "8080:8080"
       - "8081:8081"
 
+  webapp:
+    build:
+      context: .
+      dockerfile: BurLunch.WebApp/Dockerfile
+    container_name: burlunch-webapp
+    depends_on:
+      - authapi
+    environment:
+      ApiBaseUrl: "http://burlunch-authapi:8080" # Укажите адрес API
+    ports:
+      - "5000:8080" # Проброс порта для WebApp
+
 volumes:
   postgres-data:

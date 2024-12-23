@@ -9,6 +9,10 @@ namespace BurLunch.WebApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration
+                .AddJsonFile("appsettings.WebApp.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.WebApp.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
             builder.Services.AddControllersWithViews();
             builder.Services.AddHttpClient("BurLunchAPI", client =>
             {
