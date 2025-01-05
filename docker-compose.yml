@@ -22,10 +22,10 @@ services:
     depends_on:
       - postgres
     environment:
+      ASPNETCORE_PORT: 8082
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=BurLunchDb;Username=postgres;Password=burservis"
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "8082:8082"
 
   webapp:
     build:
@@ -35,9 +35,10 @@ services:
     depends_on:
       - authapi
     environment:
-      ApiBaseUrl: "http://burlunch-authapi:8080" # Укажите адрес API
+      ASPNETCORE_PORT: 5000
+      ApiBaseUrl: "http://burlunch-authapi:8082"
     ports:
-      - "5000:8080" # Проброс порта для WebApp
+      - "5000:5000"
 
 volumes:
   postgres-data:
