@@ -31,6 +31,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
           cd ~/burlunch-app
+          git pull origin main          
           docker-compose down
           docker-compose up -d --build
           EOF
