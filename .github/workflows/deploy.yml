@@ -20,18 +20,29 @@ jobs:
 
       - name: Backup existing deployment
         run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << EOF
-          mkdir -p /home/lavliet/BackUp/BurLunch/
-          tar -czvf /home/lavliet/BackUp/BurLunch/burlunch-app-backup-$(date +%Y%m%d%H%M%S).tar.gz -C ~/ burlunch-app
-          docker save -o /home/lavliet/BackUp/BurLunch/burlunch-backup-$(date +%Y%m%d%H%M%S).tar burlunch-app-webapp burlunch-app-authapi postgres
-          docker exec postgres-container pg_dump -U postgres -d BurLunchDb > /home/lavliet/BackUp/BurLunch/burlunch-db-backup-$(date +%Y%m%d%H%M%S).sql
+          docker-compose down 
+          ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          
+          # Создание папки для бэкапов, если её ещё нет
+          mkdir -p /home/lavliet/BackUp/BurLunch
+          
+          # Перемещение старой версии приложения в папку BackUp с добавлением метки времени
+          mv /home/lavliet/burlunch-app /home/lavliet/BackUp/BurLunch/burlunch-app-$TIMESTAMP          
           EOF
 
       - name: Deploy to Ubuntu Server
         run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
-          cd ~/burlunch-app
-          git pull origin main          
-          docker-compose down
+          git clone https://github.com/Lavliet2/BurLunch.git /home/lavliet/burlunch-app
+          
+          # Переход в папку с проектом и запуск деплоя
+          cd /home/lavliet/burlunch-app
           docker-compose up -d --build
           EOF
+
+          # ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
+          # cd ~/burlunch-app
+          # git pull origin main          
+          # docker-compose down
+          # docker-compose up -d --build
+          # EOF
