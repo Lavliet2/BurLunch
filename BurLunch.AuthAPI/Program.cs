@@ -1,4 +1,3 @@
-
 using BurLunch.AuthAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using BurLunch.AuthAPI.Services;
@@ -49,6 +48,9 @@ namespace BurLunch.AuthAPI
 
             app.UseAuthorization();
             app.MapControllers();
+
+            string port = Environment.GetEnvironmentVariable("ASPNETCORE_PORT") ?? "8081";
+            builder.WebHost.UseUrls($"http://*:{port}");
 
             app.Run();
         }

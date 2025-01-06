@@ -64,8 +64,11 @@ namespace BurLunch.WebApp
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");
 
-            app.Run();
+            // Чтение порта из переменной окружения
+            string port = Environment.GetEnvironmentVariable("ASPNETCORE_PORT") ?? "5001";
+            app.Urls.Add($"http://*:{port}");
 
+            app.Run();
         }
     }
 }
