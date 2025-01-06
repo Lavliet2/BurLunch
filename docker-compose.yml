@@ -27,6 +27,8 @@ services:
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=BurLunchDb;Username=postgres;Password=burservis"
     ports:
       - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   webapp:
     build:
@@ -41,6 +43,8 @@ services:
       ApiBaseUrl: "http://burlunch-authapi:8081"
     ports:
       - "5001:5001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   postgres-data:
