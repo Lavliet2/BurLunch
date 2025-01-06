@@ -20,10 +20,10 @@ jobs:
 
       - name: Backup existing deployment
         run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
+          ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << EOF
           mkdir -p /home/lavliet/BackUp/BurLunch/
-          docker save -o /home/lavliet/BackUp/BurLunch/burlunch-backup-\$(date +%Y%m%d%H%M%S).tar burlunch-app-webapp burlunch-app-authapi postgres-container
-          docker exec postgres-container pg_dump -U postgres -d BurLunchDb > /home/lavliet/BackUp/BurLunch/burlunch-db-backup-\$(date +%Y%m%d%H%M%S).sql
+          docker save -o /home/lavliet/BackUp/BurLunch/burlunch-backup-$(date +%Y%m%d%H%M%S).tar burlunch-app-webapp burlunch-app-authapi postgres-container
+          docker exec postgres-container pg_dump -U postgres -d BurLunchDb > /home/lavliet/BackUp/BurLunch/burlunch-db-backup-$(date +%Y%m%d%H%M%S).sql
           EOF
 
       - name: Deploy to Ubuntu Server
