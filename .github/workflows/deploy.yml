@@ -22,7 +22,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << EOF
           mkdir -p /home/lavliet/BackUp/BurLunch/
-          docker save -o /home/lavliet/BackUp/BurLunch/burlunch-backup-$(date +%Y%m%d%H%M%S).tar burlunch-app-webapp burlunch-app-authapi postgres-container
+          tar -czvf /home/lavliet/BackUp/BurLunch/burlunch-app-backup-$(date +%Y%m%d%H%M%S).tar.gz -C ~/ burlunch-app
+          docker save -o /home/lavliet/BackUp/BurLunch/burlunch-backup-$(date +%Y%m%d%H%M%S).tar burlunch-app-webapp burlunch-app-authapi postgres
           docker exec postgres-container pg_dump -U postgres -d BurLunchDb > /home/lavliet/BackUp/BurLunch/burlunch-db-backup-$(date +%Y%m%d%H%M%S).sql
           EOF
 
