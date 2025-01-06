@@ -49,8 +49,9 @@ namespace BurLunch.AuthAPI
             app.UseAuthorization();
             app.MapControllers();
 
-            string port = Environment.GetEnvironmentVariable("ASPNETCORE_PORT") ?? "8081";
-            builder.WebHost.UseUrls($"http://*:{port}");
+            // «акоментировать при работе из студии
+            //string port = Environment.GetEnvironmentVariable("ASPNETCORE_PORT") ?? "8081";
+            //builder.WebHost.UseUrls($"http://*:{port}");
 
             app.Run();
         }

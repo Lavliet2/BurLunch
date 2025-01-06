@@ -23,8 +23,8 @@ services:
       - postgres
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://*:8081
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=BurLunchDb;Username=postgres;Password=burservis"
-      ASPNETCORE_PORT: 8081
     ports:
       - "8081:8081"
 
@@ -37,8 +37,8 @@ services:
       - authapi
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://*:5001
       ApiBaseUrl: "http://burlunch-authapi:8081"
-      ASPNETCORE_PORT: 5001
     ports:
       - "5001:5001"
 
