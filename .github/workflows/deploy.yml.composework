@@ -1,4 +1,4 @@
-name: Deploy BurLunch App to Kubernetes
+name: Deploy BurLunch App
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main  # Запуск при пуше в ветку main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,10 +18,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Kubernetes via SSH
+      - name: Deploy to Ubuntu Server
         run: |
           ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
-          kubectl apply -f /path/to/k8s-manifests/postgres-deployment.yaml
-          kubectl apply -f /path/to/k8s-manifests/authapi-deployment.yaml
-          kubectl apply -f /path/to/k8s-manifests/webapp-deployment.yaml
+          git clone https://github.com/Lavliet2/BurLunch.git /home/lavliet/burlunch-app
+          
+          # Переход в папку с проектом и запуск деплоя
+          cd /home/lavliet/burlunch-app
+          docker-compose up -d --build
           EOF

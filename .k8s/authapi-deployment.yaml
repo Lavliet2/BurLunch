@@ -1,0 +1,41 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authapi
+  labels:
+    app: burlunch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authapi
+  template:
+    metadata:
+      labels:
+        app: authapi
+    spec:
+      containers:
+        - name: authapi
+          image: ghcr.io/lavliet2/burlunch-authapi:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: ASPNETCORE_URLS
+              value: "http://*:8081"
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=postgres;Port=5432;Database=BurLunchDb;Username=postgres;Password=burservis"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authapi
+spec:
+  selector:
+    app: authapi
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
