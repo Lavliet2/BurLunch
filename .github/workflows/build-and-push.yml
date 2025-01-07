@@ -1,4 +1,4 @@
-name: Deploy BurLunch App to Kubernetes
+name: Deploy BurLunch App
 
 on:
   push:
@@ -6,23 +6,35 @@ on:
       - main  # Запуск при пуше в ветку main
 
 jobs:
-  deploy-to-k8s:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Deploy to Kubernetes via SSH
-        run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
-          git clone https://github.com/Lavliet2/BurLunch.git /home/lavliet/burlunch-app || (cd /home/lavliet/burlunch-app && git pull)
-          kubectl apply -f /home/lavliet/burlunch-app/k8s/postgres-deployment.yaml
-          kubectl apply -f /home/lavliet/burlunch-app/k8s/authapi-deployment.yaml
-          kubectl apply -f /home/lavliet/burlunch-app/k8s/webapp-deployment.yaml
-          EOF
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push authapi image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: BurLunch.AuthAPI/Dockerfile
+          push: true
+          tags: ghcr.io/lavliet2/burlunch-authapi:latest
+
+      - name: Build and push webapp image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: BurLunch.WebApp/Dockerfile
+          push: true
+          tags: ghcr.io/lavliet2/burlunch-webapp:latest
