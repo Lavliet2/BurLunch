@@ -25,3 +25,4 @@ jobs:
           kubectl apply -f /path/to/k8s-manifests/authapi-deployment.yaml
           kubectl apply -f /path/to/k8s-manifests/webapp-deployment.yaml
           EOF
+
