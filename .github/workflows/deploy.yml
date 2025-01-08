@@ -32,4 +32,5 @@ jobs:
           # Перезапуск деплойментов, чтобы подхватились новые образы
           kubectl rollout restart deployment authapi
           kubectl rollout restart deployment webapp
+          kubectl apply -f /home/lavliet/burlunch-app/.k8s/ingress.yaml
           EOF
