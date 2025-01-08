@@ -27,6 +27,8 @@ spec:
               value: "http://*:5001"
             - name: ApiBaseUrl
               value: "http://authapi:8081"
+  imagePullSecrets:
+    - name: ghcr-secret              
 ---
 apiVersion: v1
 kind: Service
