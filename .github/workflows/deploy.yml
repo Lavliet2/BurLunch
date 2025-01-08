@@ -1,9 +1,11 @@
 name: Deploy BurLunch App to Kubernetes!
 
 on:
-  push:
-    branches:
-      - main  # Запуск при пуше в ветку main
+  workflow_run:
+    workflows:
+      - Deploy BurLunch App
+    types:
+      - completed
 
 jobs:
   deploy-to-k8s:
