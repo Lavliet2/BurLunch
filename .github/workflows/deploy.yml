@@ -26,8 +26,8 @@ jobs:
           rm -rf /home/lavliet/burlunch-app
           git clone https://github.com/Lavliet2/BurLunch.git /home/lavliet/burlunch-app
           cd /home/lavliet/burlunch-app
-          kubectl apply -f ./.k8s/postgres-deployment.yaml
-          kubectl apply -f ./.k8s/authapi-deployment.yaml
-          kubectl apply -f ./.k8s/webapp-deployment.yaml
+          kubectl apply -f /home/lavliet/burlunch-app/.k8s/postgres-deployment.yaml
+          kubectl apply -f /home/lavliet/burlunch-app/.k8s/authapi-deployment.yaml
+          kubectl apply -f /home/lavliet/burlunch-app/.k8s/webapp-deployment.yaml
 
 
