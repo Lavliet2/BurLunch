@@ -20,12 +20,12 @@ jobs:
 
       - name: Deploy to Kubernetes via SSH
         run: |
-ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
-rm -rf /home/lavliet/burlunch-app
-git clone https://github.com/Lavliet2/BurLunch.git /home/lavliet/burlunch-app
-cd /home/lavliet/burlunch-app
-kubectl apply -f ./.k8s/postgres-deployment.yaml
-kubectl apply -f ./.k8s/authapi-deployment.yaml
-kubectl apply -f ./.k8s/webapp-deployment.yaml
+          ssh -o StrictHostKeyChecking=no -p 2222 lavliet@178.72.83.217 << 'EOF'
+          rm -rf /home/lavliet/burlunch-app
+          git clone https://github.com/Lavliet2/BurLunch.git /home/lavliet/burlunch-app
+          cd /home/lavliet/burlunch-app
+          kubectl apply -f ./.k8s/postgres-deployment.yaml
+          kubectl apply -f ./.k8s/authapi-deployment.yaml
+          kubectl apply -f ./.k8s/webapp-deployment.yaml
 
 
