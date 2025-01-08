@@ -26,7 +26,7 @@ spec:
               value: "http://*:8081"
             - name: ConnectionStrings__DefaultConnection
               value: "Host=postgres;Port=5432;Database=BurLunchDb;Username=postgres;Password=burservis"
-      imagePullSecrets:  # Обратите внимание, это поле теперь внутри spec.template.spec
+      imagePullSecrets:
         - name: ghcr-secret
 ---
 apiVersion: v1
