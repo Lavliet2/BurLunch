@@ -34,6 +34,7 @@ kind: Service
 metadata:
   name: authapi
 spec:
+  type: NodePort
   selector:
     app: authapi
   ports:
